@@ -748,41 +748,23 @@ flowchart TB
       <section>
         <h2>오라클 클라우드 인프라 &amp; mTLS 단말 보안</h2>
         <p class="lead">
-          초기엔 로컬 Docker + ngrok으로 개발했지만, 안정적인 상시 가동을 위해
-          Oracle Cloud Always Free VM으로 이전했습니다. n8n 관리 화면은 mTLS로 잠겨 있어
-          클라이언트 인증서가 설치된 단말에서만 접근 가능합니다.
+          n8n은 Oracle Cloud Always Free VM에서 24시간 상시 가동됩니다.
+          n8n 관리 화면은 mTLS로 잠겨 있어 클라이언트 인증서가 설치된 단말에서만 접근 가능합니다.
+          Telegram 봇 통신과 외부 API 아웃바운드는 mTLS 영향 없이 정상 동작합니다.
         </p>
 
-        <div class="grid two" style="margin-top:24px;">
-          <!-- 인프라 구조 -->
-          <div>
-            <h3>인프라 구조</h3>
-            <table>
-              <thead><tr><th>항목</th><th>값</th></tr></thead>
-              <tbody>
-                <tr><td><strong>클라우드</strong></td><td>Oracle Cloud Always Free (A1.Flex)</td></tr>
-                <tr><td><strong>리전</strong></td><td>서울 (ap-seoul-1)</td></tr>
-                <tr><td><strong>IP</strong></td><td>152.70.37.180</td></tr>
-                <tr><td><strong>도메인</strong></td><td>n8n.wonju.my (고정)</td></tr>
-                <tr><td><strong>이전 완료</strong></td><td>2026-06-09 (로컬 Docker → 오라클)</td></tr>
-                <tr><td><strong>ngrok</strong></td><td>❌ 폐기 — 오라클 고정 도메인으로 직접 연결</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <!-- 이전 전후 비교 -->
-          <div>
-            <h3>이전 전 / 이전 후</h3>
-            <table>
-              <thead><tr><th>항목</th><th>Before</th><th>After</th></tr></thead>
-              <tbody>
-                <tr><td>실행 환경</td><td>로컬 PC Docker</td><td>Oracle Cloud VM</td></tr>
-                <tr><td>URL</td><td>ngrok 임시 URL</td><td>n8n.wonju.my 고정</td></tr>
-                <tr><td>가용성</td><td>PC 켜져야 동작</td><td>24시간 상시 가동</td></tr>
-                <tr><td>Telegram 연결</td><td>ngrok 터널 필요</td><td>직접 Webhook 연결</td></tr>
-                <tr><td>보안</td><td>ngrok 노출</td><td>mTLS 단말 인증서</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div style="margin-top:24px;">
+          <h3>인프라 구조</h3>
+          <table>
+            <thead><tr><th>항목</th><th>값</th></tr></thead>
+            <tbody>
+              <tr><td><strong>클라우드</strong></td><td>Oracle Cloud Always Free (A1.Flex)</td></tr>
+              <tr><td><strong>리전</strong></td><td>서울 (ap-seoul-1)</td></tr>
+              <tr><td><strong>IP</strong></td><td>152.70.37.180</td></tr>
+              <tr><td><strong>도메인</strong></td><td>n8n.wonju.my (고정 도메인, Telegram Webhook 직결)</td></tr>
+              <tr><td><strong>가용성</strong></td><td>24시간 상시 가동 · PC 의존 없음</td></tr>
+            </tbody>
+          </table>
         </div>
 
         <h3 style="margin-top:28px;">mTLS 보안 구조</h3>
