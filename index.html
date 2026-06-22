@@ -647,7 +647,7 @@
         </div>
         <div class="hero-panel">
           <h2>인프라</h2>
-          <p>Oracle Cloud Always Free VM · n8n.wonju.my · Caddy mTLS 단말 인증서 보안</p>
+          <p>Oracle Cloud Always Free VM · 전용 도메인 · Caddy mTLS 단말 인증서 보안</p>
         </div>
         <div class="hero-panel">
           <h2>Phase 1 강화</h2>
@@ -758,10 +758,9 @@ flowchart TB
           <table>
             <thead><tr><th>항목</th><th>값</th></tr></thead>
             <tbody>
-              <tr><td><strong>클라우드</strong></td><td>Oracle Cloud Always Free (A1.Flex)</td></tr>
-              <tr><td><strong>리전</strong></td><td>서울 (ap-seoul-1)</td></tr>
-              <tr><td><strong>IP</strong></td><td>152.70.37.180</td></tr>
-              <tr><td><strong>도메인</strong></td><td>n8n.wonju.my (고정 도메인, Telegram Webhook 직결)</td></tr>
+              <tr><td><strong>클라우드</strong></td><td>Oracle Cloud Always Free</td></tr>
+              <tr><td><strong>리전</strong></td><td>서울</td></tr>
+              <tr><td><strong>도메인</strong></td><td>전용 고정 도메인 (Telegram Webhook 직결)</td></tr>
               <tr><td><strong>가용성</strong></td><td>24시간 상시 가동 · PC 의존 없음</td></tr>
             </tbody>
           </table>
@@ -832,7 +831,7 @@ flowchart TB
             <p style="margin:8px 0 0;font-size:.92rem;">
               1. <code style="background:#f1f5fb;padding:1px 5px;border-radius:3px;font-size:.88em;">ca.key</code>로 새 .p12 인증서 발급<br>
               2. 새 단말에 <code style="background:#f1f5fb;padding:1px 5px;border-radius:3px;font-size:.88em;">ca.crt</code> + 새 .p12 설치<br>
-              3. 브라우저에서 n8n.wonju.my 접속 테스트<br>
+              3. 브라우저에서 n8n 도메인 접속 테스트<br>
               <span style="font-size:.85rem;color:#92400e;">⚠️ 서버 설정 변경 불필요, 기존 단말 영향 없음</span>
             </p>
           </div>
@@ -1147,7 +1146,7 @@ flowchart TB
 flowchart LR
   U["사용자"] --> TG["Telegram Bot\n입력·버튼·응답"]
   TG --> CADDY["Caddy\n/webhook* open\n그 외 mTLS 차단"]
-  CADDY --> N8N["n8n Workflow\n오라클 클라우드 VM\nn8n.wonju.my"]
+  CADDY --> N8N["n8n Workflow\n오라클 클라우드 VM"]
 
   N8N --> OPENAI["gpt-4o-mini\n분류·요약·추출\n(전 타입 동일)"]
 
@@ -1539,7 +1538,7 @@ flowchart LR
 
     <footer>
       <strong>AI 개인비서 자동화 시스템 v4</strong><br>
-      Telegram · n8n (Oracle Cloud Always Free VM · n8n.wonju.my) · Caddy mTLS · gpt-4o-mini · Google Cloud · Sheets · Drive · Calendar
+      Telegram · n8n (Oracle Cloud Always Free VM) · Caddy mTLS · gpt-4o-mini · Google Cloud · Sheets · Drive · Calendar
     </footer>
   </div>
 
