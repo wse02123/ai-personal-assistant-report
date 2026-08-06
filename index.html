@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 개인비서 자동화 시스템 v4</title>
+  <title>AI 개인비서 자동화 시스템 v5</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <style>
     :root {
@@ -55,7 +55,7 @@
     }
 
     header::after {
-      content: "AI AUTOMATION CASE · v4";
+      content: "AI AUTOMATION CASE · v5";
       position: absolute;
       right: 72px; top: 42px;
       color: rgba(255,255,255,.26);
@@ -1273,18 +1273,29 @@ flowchart LR
 
           <div class="pipe-stage">
             <div class="pipe-stage-hd" style="background:#ea4b71;">
-              <span class="pnum">03</span> 라우팅
+              <span class="pnum">03</span> 파싱
             </div>
             <div class="pipe-stage-bd">
-              <div class="pipe-stage-name">n8n 파싱</div>
-              <div class="pipe-stage-detail">입력 유형(텍스트/파일/버튼), 명령 의도 판별</div>
+              <div class="pipe-stage-name">n8n 전처리</div>
+              <div class="pipe-stage-detail">입력 유형(텍스트/파일/버튼) 추출, 명시 접두어(수정:/삭제:/메모:/조회:) 확정</div>
+            </div>
+          </div>
+          <div class="pipe-conn">→</div>
+
+          <div class="pipe-stage">
+            <div class="pipe-stage-hd" style="background:#b7791f;">
+              <span class="pnum">04</span> 의도분류
+            </div>
+            <div class="pipe-stage-bd">
+              <div class="pipe-stage-name">gpt-4o-mini (AI 라우터)</div>
+              <div class="pipe-stage-detail">생성/수정/삭제/조회/완료 action 판별. 접두어로 이미 확정된 건 AI 호출 자체를 건너뜀</div>
             </div>
           </div>
           <div class="pipe-conn">→</div>
 
           <div class="pipe-stage">
             <div class="pipe-stage-hd" style="background:#7c3aed;">
-              <span class="pnum">04</span> 분석
+              <span class="pnum">05</span> 분석
             </div>
             <div class="pipe-stage-bd">
               <div class="pipe-stage-name">gpt-4o-mini</div>
@@ -1295,7 +1306,7 @@ flowchart LR
 
           <div class="pipe-stage">
             <div class="pipe-stage-hd" style="background:#16836b;">
-              <span class="pnum">05</span> 저장·실행
+              <span class="pnum">06</span> 저장·실행
             </div>
             <div class="pipe-stage-bd">
               <div class="pipe-stage-name">Google APIs</div>
@@ -1306,7 +1317,7 @@ flowchart LR
 
           <div class="pipe-stage">
             <div class="pipe-stage-hd" style="background:#26a5e4;">
-              <span class="pnum">06</span> 응답
+              <span class="pnum">07</span> 응답
             </div>
             <div class="pipe-stage-bd">
               <div class="pipe-stage-name">Telegram</div>
@@ -1317,7 +1328,7 @@ flowchart LR
 
         <!-- 조건부 분기 표시 -->
         <div style="margin-top:20px;">
-          <h3>단계 05 조건부 분기</h3>
+          <h3>단계 06 조건부 분기</h3>
           <div class="grid three" style="gap:12px;margin-top:12px;">
             <div style="padding:14px 16px;border-radius:8px;border:1px solid #dbe3ee;background:#f8fafc;border-left:4px solid #2563eb;">
               <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#1d4ed8;">🗂 모든 항목</strong>
@@ -1370,7 +1381,7 @@ flowchart LR
           <div class="bcase">
             <div class="bcase-hd" style="background:#b7791f;">수정 / 삭제 / 조회</div>
             <div class="bcase-bd">
-              <div class="bcase-step"><span class="bstep-dot" style="background:#b7791f;"></span>의도 파악 (수정/삭제/조회 키워드)</div>
+              <div class="bcase-step"><span class="bstep-dot" style="background:#b7791f;"></span>AI 의도분류로 action 판별 (생성/수정/삭제/조회/완료)</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#64748b;"></span>Sheets에서 후보 항목 검색</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#b7791f;"></span>후보 버튼으로 사용자 확인</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#16836b;"></span>확인 후 Sheets 갱신 / 항목 반환</div>
@@ -1416,14 +1427,17 @@ flowchart TB
       <section>
         <h2>AI 모델 연계 구조</h2>
         <p>
-          모든 입력 타입에 <strong>gpt-4o-mini</strong> 단일 모델을 사용합니다.
+          <strong>gpt-4o-mini</strong> 단일 모델을 의도분류와 본분석, 두 단계에서 나눠 씁니다.
           모델을 통일함으로써 날짜 계산 정확도와 지시문 준수율을 높였습니다.
-          프롬프트에는 오늘 날짜 기준으로 이번주/다음주 날짜를 미리 계산한 빠른참조 테이블이 포함됩니다.
+          본분석 프롬프트에는 오늘 날짜 기준으로 이번주/다음주 날짜를 미리 계산한 빠른참조 테이블이 포함됩니다.
         </p>
         <div class="diagram-wrap">
           <div class="mermaid">
 flowchart LR
-  INPUT["원본 입력\n텍스트·이미지·PDF·URL"] --> ROUTER["gpt-4o-mini\n입력 타입별 프롬프트 구성"]
+  INPUT["원본 입력\n텍스트·이미지·PDF·URL"] --> PRE["n8n 전처리\n입력 유형 추출 · 접두어 확정"]
+  PRE -->|접두어로 미확정| INTENT["gpt-4o-mini\n의도분류 (action 판별)"]
+  PRE -->|접두어로 이미 확정| ROUTER
+  INTENT --> ROUTER["gpt-4o-mini\n입력 타입별 프롬프트 구성"]
   ROUTER --> O1["텍스트 분석\n분류·요약·날짜·시간 추출"]
   ROUTER --> O2["Vision / PDF 분석\n파일 내용 이해 + 구조화"]
 
@@ -1439,6 +1453,17 @@ flowchart LR
             프롬프트 첫 줄에 <code style="background:#f1f5fb;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:.88em;">오늘=2026-06-14, 이번주 토=2026-06-14, 다음주 화=2026-06-16...</code> 식으로
             모든 요일을 실제 날짜로 미리 계산해 주입합니다. AI는 직접 날짜를 계산하지 않고
             이 테이블에서 복사만 합니다. gpt-4.1-nano에서 발생하던 날짜 off-by-one 오류가 이 방법으로 해결되었습니다.
+          </p>
+        </div>
+        <div class="callout" style="margin-top:16px;">
+          <h3>왜 키워드 룰에서 AI 의도분류로 바꿨나</h3>
+          <p style="font-size:.92rem;margin-top:8px;">
+            초기에는 "삭제해", "확인해" 같은 끝말 키워드로 생성/수정/삭제/조회를 n8n 안에서 직접 판별했습니다.
+            문장 구조가 조금만 벗어나도 다른 의도로 오분류되는 문제가 반복됐습니다.
+            그래서 이 판별 로직을 통째로 걷어내고, 별도의 경량 AI 호출(의도분류)이 action만 먼저 결정하도록 분리했습니다.
+            키워드 룰은 완전히 사라진 게 아니라 <code style="background:#f1f5fb;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:.88em;">수정:</code> /
+            <code style="background:#f1f5fb;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:.88em;">삭제:</code> 같은
+            명시적 접두어 확정과, AI 호출 장애 시 폴백 용도로만 남았습니다.
           </p>
         </div>
       </section>
@@ -1529,6 +1554,7 @@ flowchart LR
           <span class="badge new">🔁 반복 일정 감지</span>
           <span class="badge new">⏰ 시간 범위 등록</span>
           <span class="badge new">📋 summary 정형화</span>
+          <span class="badge new">🧭 AI 의도분류 라우터</span>
           <span class="badge security">🔐 mTLS 단말 보안</span>
           <span class="badge security">☁️ 오라클 클라우드 상시가동</span>
         </div>
@@ -1537,7 +1563,7 @@ flowchart LR
     </main>
 
     <footer>
-      <strong>AI 개인비서 자동화 시스템 v4</strong><br>
+      <strong>AI 개인비서 자동화 시스템 v5</strong><br>
       Telegram · n8n (Oracle Cloud Always Free VM) · Caddy mTLS · gpt-4o-mini · Google Cloud · Sheets · Drive · Calendar
     </footer>
   </div>
