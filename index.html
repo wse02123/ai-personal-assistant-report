@@ -6,6 +6,10 @@
   <title>AI 개인비서 자동화 시스템 v5</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <style>
+/* ── 인라인 아이콘 (이모지 대체) ── */
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex:none;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;margin-right:.34em;}
+.ic-ok{color:#16a34a}.ic-warn{color:#d97706}.ic-no{color:#dc2626}
+
     :root {
       --ink: #142033;
       --muted: #667085;
@@ -13,12 +17,12 @@
       --paper: #ffffff;
       --wash: #f5f8fc;
       --blue: #2563eb;
-      --cyan: #0891b2;
+      --cyan: #2563eb;
       --green: #16836b;
       --amber: #b7791f;
       --rose: #c2415d;
       --dark: #101827;
-      --purple: #7c3aed;
+      --purple: #334155;
       --oracle: #c0392b;
     }
 
@@ -113,8 +117,7 @@
       color: #93c5fd;
       margin-bottom: 8px;
       font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .06em;
+      letter-spacing: .02em;
     }
 
     .hero-panel p {
@@ -526,7 +529,7 @@
 
     .sec-caddy {
       border-radius: 10px;
-      border: 2px solid #0891b2;
+      border: 2px solid #2563eb;
       padding: 14px 10px;
       background: #ecfeff;
       text-align: center;
@@ -625,6 +628,8 @@
   </style>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="ic-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol><symbol id="ic-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol><symbol id="ic-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol><symbol id="ic-cal" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol><symbol id="ic-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9Z"/></symbol><symbol id="ic-bot" viewBox="0 0 24 24"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></symbol><symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/><path d="M2 12h20"/></symbol><symbol id="ic-folder" viewBox="0 0 24 24"><path d="M20 17a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.9a2 2 0 0 1-1.7-.9l-.8-1.2a2 2 0 0 0-1.7-.9H8a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2Z"/><path d="M2 8v11a2 2 0 0 0 2 2h14"/></symbol><symbol id="ic-clip" viewBox="0 0 24 24"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6A4 4 0 1 1 18 8.8l-8.6 8.6a2 2 0 0 1-2.8-2.9l8.5-8.4"/></symbol><symbol id="ic-book" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol><symbol id="ic-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol><symbol id="ic-board" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol><symbol id="ic-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.2 7.8 14.1 14.1 7.8 16.2 9.9 9.9 16.2 7.8"/></symbol><symbol id="ic-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol></svg>
+
   <div class="deck">
 
     <!-- ═══════════ HEADER ═══════════ -->
@@ -738,7 +743,7 @@ flowchart TB
           </div>
           <div class="logo-tile">
             <!-- Caddy (shield icon) -->
-            <svg class="brand-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><title>Caddy</title><path d="M12 2L4 6v6c0 5.25 3.6 10.15 8 11.5C16.4 22.15 20 17.25 20 12V6l-8-4z" fill="#0891b2"/><path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="brand-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><title>Caddy</title><path d="M12 2L4 6v6c0 5.25 3.6 10.15 8 11.5C16.4 22.15 20 17.25 20 12V6l-8-4z" fill="#2563eb"/><path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div><b>Caddy</b><span>Reverse Proxy · mTLS 보안</span></div>
           </div>
         </div>
@@ -774,15 +779,15 @@ flowchart TB
           <!-- 왼쪽: 요청 출처 -->
           <div class="sec-side">
             <div class="sec-node">
-              <b>🤖 Telegram Bot</b>
+              <b><svg class="ic" aria-hidden="true"><use href="#ic-bot"/></svg> Telegram Bot</b>
               Webhook 이벤트 전송 (<code style="font-size:.82em;background:#f1f5fb;padding:1px 5px;border-radius:3px;">/webhook/wj-*</code>)
             </div>
             <div class="sec-node">
-              <b>🌐 브라우저 (n8n 관리 UI)</b>
+              <b><svg class="ic" aria-hidden="true"><use href="#ic-globe"/></svg> 브라우저 (n8n 관리 UI)</b>
               클라이언트 인증서 설치된 단말에서 접근
             </div>
             <div class="sec-node">
-              <b>☁️ Google / OpenAI API</b>
+              <b><svg class="ic" aria-hidden="true"><use href="#ic-cloud"/></svg> Google / OpenAI API</b>
               아웃바운드 — 서버에서 직접 호출, 영향 없음
             </div>
           </div>
@@ -806,15 +811,15 @@ flowchart TB
           <!-- 오른쪽: 결과 -->
           <div class="sec-side">
             <div class="sec-node">
-              <b>✅ /webhook* 경로</b>
+              <b><svg class="ic ic-ok" aria-hidden="true"><use href="#ic-check"/></svg> /webhook* 경로</b>
               <span class="sec-badge open">OPEN</span> 인증서 없어도 통과 → n8n
             </div>
             <div class="sec-node">
-              <b>✅ 인증서 있는 단말</b>
+              <b><svg class="ic ic-ok" aria-hidden="true"><use href="#ic-check"/></svg> 인증서 있는 단말</b>
               <span class="sec-badge open">ALLOWED</span> n8n 관리 UI 접근 가능
             </div>
             <div class="sec-node">
-              <b>❌ 인증서 없는 요청</b>
+              <b><svg class="ic ic-no" aria-hidden="true"><use href="#ic-x"/></svg> 인증서 없는 요청</b>
               <span class="sec-badge blocked">403 BLOCKED</span> 로그인 화면조차 차단
             </div>
           </div>
@@ -823,7 +828,7 @@ flowchart TB
         <div class="grid two" style="margin-top:24px;">
           <div class="callout">
             <h3>등록된 단말 (2026-06-10 기준)</h3>
-            <p style="margin:8px 0 0;">갤럭시북 (노트북) ✅ &nbsp;·&nbsp; 갤럭시 폰 ✅<br>
+            <p style="margin:8px 0 0;">갤럭시북 (노트북) <svg class="ic ic-ok" aria-hidden="true"><use href="#ic-check"/></svg> &nbsp;·&nbsp; 갤럭시 폰 <svg class="ic ic-ok" aria-hidden="true"><use href="#ic-check"/></svg><br>
             <span style="font-size:.88rem;">인증서 만료: 2031-06-09 (CA 2036-06-07)</span></p>
           </div>
           <div class="callout">
@@ -832,7 +837,7 @@ flowchart TB
               1. <code style="background:#f1f5fb;padding:1px 5px;border-radius:3px;font-size:.88em;">ca.key</code>로 새 .p12 인증서 발급<br>
               2. 새 단말에 <code style="background:#f1f5fb;padding:1px 5px;border-radius:3px;font-size:.88em;">ca.crt</code> + 새 .p12 설치<br>
               3. 브라우저에서 n8n 도메인 접속 테스트<br>
-              <span style="font-size:.85rem;color:#92400e;">⚠️ 서버 설정 변경 불필요, 기존 단말 영향 없음</span>
+              <span style="font-size:.85rem;color:#92400e;"><svg class="ic ic-warn" aria-hidden="true"><use href="#ic-alert"/></svg> 서버 설정 변경 불필요, 기존 단말 영향 없음</span>
             </p>
           </div>
         </div>
@@ -959,11 +964,11 @@ flowchart TB
                 <text x="40" y="271" fill="#111827" font-size="14">일정/할일 › 스포츠/운동</text>
                 <text x="40" y="296" fill="#596579" font-size="13">시간: 09:00~11:00 | 장소: - |</text>
                 <text x="40" y="314" fill="#596579" font-size="13">멤버: 아경, 동수 | 비고: -</text>
-                <text x="40" y="334" fill="#16836b" font-size="14" font-weight="900">📅 캘린더 등록됨</text>
+                <text x="40" y="334" fill="#16836b" font-size="14" font-weight="900"> 캘린더 등록됨</text>
                 <rect x="20" y="358" width="270" height="80" rx="16" fill="#fff"/>
                 <text x="40" y="384" fill="#111827" font-size="16" font-weight="900">까꿍이 병원 예약필요</text>
                 <text x="40" y="406" fill="#111827" font-size="13">일정/할일 › 동물/반려동물</text>
-                <text x="40" y="428" fill="#c2415d" font-size="13" font-weight="700">⚠️ 예약 필요 항목입니다</text>
+                <text x="40" y="428" fill="#c2415d" font-size="13" font-weight="700"> 예약 필요 항목입니다</text>
               </g>
             </svg>
             <div class="shot-caption">자연어로 보내면 title suffix, 시간, 멤버까지 자동 정리되어 캘린더에 등록됩니다.</div>
@@ -1055,7 +1060,7 @@ flowchart TB
             </div>
           </div>
           <div class="cal-mode">
-            <div class="cal-mode-hd" style="background:#7c3aed;">날짜 범위 이벤트</div>
+            <div class="cal-mode-hd" style="background:#334155;">날짜 범위 이벤트</div>
             <div class="cal-mode-bd">
               <p>start_date ≠ due_date일 때. 범위 전체를 하나의 이벤트로 등록합니다.</p>
               <code>start: "2026-06-16" → end: "2026-06-17"</code>
@@ -1294,7 +1299,7 @@ flowchart LR
           <div class="pipe-conn">→</div>
 
           <div class="pipe-stage">
-            <div class="pipe-stage-hd" style="background:#7c3aed;">
+            <div class="pipe-stage-hd" style="background:#334155;">
               <span class="pnum">05</span> 분석
             </div>
             <div class="pipe-stage-bd">
@@ -1331,15 +1336,15 @@ flowchart LR
           <h3>단계 06 조건부 분기</h3>
           <div class="grid three" style="gap:12px;margin-top:12px;">
             <div style="padding:14px 16px;border-radius:8px;border:1px solid #dbe3ee;background:#f8fafc;border-left:4px solid #2563eb;">
-              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#1d4ed8;">🗂 모든 항목</strong>
+              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#1d4ed8;"><svg class="ic" aria-hidden="true"><use href="#ic-folder"/></svg> 모든 항목</strong>
               <span style="font-size:.88rem;color:#475569;line-height:1.6;">Google Sheets에 구조화된 필드로 저장</span>
             </div>
             <div style="padding:14px 16px;border-radius:8px;border:1px solid #dbe3ee;background:#f8fafc;border-left:4px solid #16836b;">
-              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#166534;">📅 일정/할일 카테고리</strong>
+              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#166534;"><svg class="ic" aria-hidden="true"><use href="#ic-cal"/></svg> 일정/할일 카테고리</strong>
               <span style="font-size:.88rem;color:#475569;line-height:1.6;">Google Calendar 자동 등록 (시간/하루종일/날짜범위 중 자동 선택)</span>
             </div>
-            <div style="padding:14px 16px;border-radius:8px;border:1px solid #dbe3ee;background:#f8fafc;border-left:4px solid #7c3aed;">
-              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#6d28d9;">📎 파일 첨부 항목</strong>
+            <div style="padding:14px 16px;border-radius:8px;border:1px solid #dbe3ee;background:#f8fafc;border-left:4px solid #334155;">
+              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#334155;"><svg class="ic" aria-hidden="true"><use href="#ic-clip"/></svg> 파일 첨부 항목</strong>
               <span style="font-size:.88rem;color:#475569;line-height:1.6;">Google Drive에 파일 업로드, Sheets에 경로 기록</span>
             </div>
           </div>
@@ -1359,7 +1364,7 @@ flowchart LR
             <div class="bcase-hd" style="background:#2563eb;">일반 텍스트 저장</div>
             <div class="bcase-bd">
               <div class="bcase-step"><span class="bstep-dot" style="background:#2563eb;"></span>텍스트 수신 → 메시지 파싱</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#7c3aed;"></span>gpt-4o-mini로 전체 필드 추출</div>
+              <div class="bcase-step"><span class="bstep-dot" style="background:#334155;"></span>gpt-4o-mini로 전체 필드 추출</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#64748b;"></span>카테고리 검증 → 중복 체크</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#16836b;"></span>Sheets 저장</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#16836b;"></span>일정/할일이면 Calendar 등록</div>
@@ -1374,7 +1379,7 @@ flowchart LR
               <div class="bcase-step"><span class="bstep-dot" style="background:#f59e0b;"></span>Pending 시트에 파일 임시 저장</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#64748b;"></span>"설명을 보내주세요" 안내</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#ea4b71;"></span>다음 텍스트 수신 → 파일과 병합</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#7c3aed;"></span>gpt-4o-mini 분석 → 저장</div>
+              <div class="bcase-step"><span class="bstep-dot" style="background:#334155;"></span>gpt-4o-mini 분석 → 저장</div>
             </div>
           </div>
 
@@ -1393,7 +1398,7 @@ flowchart LR
             <div class="bcase-hd" style="background:#c2415d;">중복 감지 / 새 카테고리</div>
             <div class="bcase-bd">
               <div class="bcase-step"><span class="bstep-dot" style="background:#c2415d;"></span>중복 가능성 감지 → 덮어쓰기/취소 버튼</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#7c3aed;"></span>새 카테고리 감지 → 등록 확인 요청</div>
+              <div class="bcase-step"><span class="bstep-dot" style="background:#334155;"></span>새 카테고리 감지 → 등록 확인 요청</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#64748b;"></span>사용자 버튼 응답 대기</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#16836b;"></span>확인 선택 → Sheets 저장 실행</div>
               <div class="bcase-step"><span class="bstep-dot" style="background:#26a5e4;"></span>완료 응답</div>
@@ -1549,14 +1554,14 @@ flowchart LR
           <span class="badge">수정</span>
           <span class="badge">삭제</span>
           <span class="badge">파일 저장</span>
-          <span class="badge new">📅 Calendar 자동등록</span>
-          <span class="badge new">🔖 예약필요 알림</span>
-          <span class="badge new">🔁 반복 일정 감지</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-cal"/></svg> Calendar 자동등록</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-book"/></svg> 예약필요 알림</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-repeat"/></svg> 반복 일정 감지</span>
           <span class="badge new">⏰ 시간 범위 등록</span>
-          <span class="badge new">📋 summary 정형화</span>
-          <span class="badge new">🧭 AI 의도분류 라우터</span>
-          <span class="badge security">🔐 mTLS 단말 보안</span>
-          <span class="badge security">☁️ 오라클 클라우드 상시가동</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-board"/></svg> summary 정형화</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-compass"/></svg> AI 의도분류 라우터</span>
+          <span class="badge security"><svg class="ic" aria-hidden="true"><use href="#ic-lock"/></svg> mTLS 단말 보안</span>
+          <span class="badge security"><svg class="ic" aria-hidden="true"><use href="#ic-cloud"/></svg> 오라클 클라우드 상시가동</span>
         </div>
       </section>
 
