@@ -3,709 +3,505 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 개인비서 자동화 시스템 v5</title>
+  <title>AI 개인비서 자동화 시스템</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <!-- QC: 그라디언트 0 / 이모지 0(실제 발송 메시지 원문 재현 제외) / 임의hex 0 / 그리드 ✅ -->
   <style>
-/* ── 인라인 아이콘 (이모지 대체) ── */
+/* ═══════════════════════════════════════════════
+   토큰 — 공통 골격은 3개 리포트 동일, primary만 프로젝트 고유
+   ═══════════════════════════════════════════════ */
+:root{
+  /* primary — AI 개인비서 (번트 테라코타) */
+  --primary:#A85A2E;
+  --primary-light:#FBF1EA;
+  --primary-lighter:#FDF8F4;
+  --primary-dark:#7D4123;
+  --primary-border:#E3C4AC;
+
+  /* 공통 골격 */
+  --surface:#F7F5F0;
+  --card:#FFFFFF;
+  --card-alt:#FAF9F6;
+  --border:#E8E4DC;
+  --border-strong:#D6D0C6;
+  --text-primary:#2C2C2C;
+  --text-secondary:#5A5A5A;
+  --text-tertiary:#8E8E93;
+
+  /* semantic 4종 */
+  --success:#10B981; --success-light:#ECFDF5; --success-dark:#05714F; --success-border:#A7F3D0;
+  --warning:#F59E0B; --warning-light:#FFFBEB; --warning-dark:#7A5C10; --warning-border:#F0D9A0;
+  --error:#EF4444;   --error-light:#FEF2F2;   --error-dark:#9B1C1C;   --error-border:#F5B5B5;
+  --info:#3B82F6;    --info-light:#EFF6FF;    --info-dark:#1D4ED8;    --info-border:#BFDBFE;
+
+  /* 코드 */
+  --code-bg:#2C2C2C; --code-fg:#F1F0EC; --code-inline-bg:#F1F0EC;
+  --mono:Consolas,"Cascadia Code","SFMono-Regular",Menlo,"Pretendard","Malgun Gothic","Apple SD Gothic Neo",monospace;
+
+  /* 간격 — 8pt 그리드 */
+  --space-1:4px;  --space-2:8px;  --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px;
+  --space-12:48px; --space-16:64px;
+
+  /* 타입 스케일 — 데스크탑 웹 base 16 · ratio 1.2 */
+  --text-caption:11px; --text-label:13px; --text-body:16px;
+  --text-title-s:19px; --text-title-m:23px; --text-title-l:28px; --text-display:33px;
+
+  /* radius — 요소별 차등 */
+  --radius-xs:6px; --radius-sm:8px; --radius-md:12px;
+  --radius-lg:14px; --radius-xl:20px; --radius-full:99px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif;
+  background:var(--surface);
+  color:var(--text-primary);
+  font-size:var(--text-body);
+  line-height:1.7;
+  word-break:keep-all;
+  overflow-wrap:break-word;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--primary);}
+
+/* ── 인라인 아이콘 ── */
 .ic{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex:none;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;margin-right:.34em;}
-.ic-ok{color:#16a34a}.ic-warn{color:#d97706}.ic-no{color:#dc2626}
+.ic-ok{color:var(--success-dark);}
+.ic-warn{color:var(--warning-dark);}
+.ic-no{color:var(--error-dark);}
+
+/* ═══ 공용 헤더 · 챕터 바 ═══ */
+.project-header{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  padding:var(--space-3) max(32px, calc((100% - 1040px) / 2 + 32px));
+  display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;
+}
+.ph-name{font-size:14px;font-weight:800;color:var(--primary);}
+.ph-sep{color:var(--border-strong);}
+.ph-desc{font-size:var(--text-label);color:var(--text-secondary);}
+
+/* ═══ 우측 플로팅 네비게이터 (원페이지 섹션 이동) ═══ */
+.toc-floating{
+  position:fixed;right:12px;top:80px;width:176px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-md);padding:var(--space-3);
+  max-height:calc(100vh - 120px);overflow-y:auto;z-index:90;
+}
+.toc-floating-title{
+  font-size:var(--text-caption);font-weight:800;letter-spacing:0.08em;
+  color:var(--text-tertiary);margin-bottom:var(--space-2);
+  padding-bottom:var(--space-2);border-bottom:1px solid var(--border);
+}
+.toc-floating a{
+  display:block;font-size:var(--text-caption);color:var(--text-secondary);
+  text-decoration:none;padding:var(--space-1) var(--space-2);border-radius:var(--radius-xs);
+  margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.toc-floating a:hover{background:var(--primary-light);color:var(--primary-dark);}
+.toc-floating a.active{background:var(--primary-light);color:var(--primary-dark);font-weight:700;}
+@media(max-width:1439px){.toc-floating{display:none;}}
+
+.wrap{max-width:1040px;margin:0 auto;padding:0 var(--space-8) 96px;}
+
+/* ═══ 히어로 ═══ */
+header{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+  padding:var(--space-10);
+  margin-top:var(--space-10);
+}
+.eyebrow{
+  font-size:var(--text-caption);font-weight:700;letter-spacing:0.08em;
+  color:var(--primary);margin-bottom:var(--space-3);
+}
+h1{
+  font-size:var(--text-display);font-weight:800;letter-spacing:-0.025em;line-height:1.22;
+  color:var(--text-primary);margin-bottom:var(--space-4);
+}
+.subtitle{
+  font-size:17px;line-height:1.7;color:var(--text-secondary);
+  margin-bottom:var(--space-8);
+}
+.hero-map{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);}
+.hero-panel{
+  background:var(--card-alt);border:1px solid var(--border);
+  border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);
+}
+.hero-panel h2{
+  font-size:var(--text-label);font-weight:700;color:var(--primary-dark);
+  margin-bottom:var(--space-2);letter-spacing:0;
+}
+.hero-panel p{font-size:var(--text-label);line-height:1.65;color:var(--text-secondary);margin:0;}
+
+/* ═══ 목차 ═══ */
+.toc-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);
+  margin-top:var(--space-6);
+}
+.toc-label{font-size:var(--text-caption);font-weight:700;color:var(--text-tertiary);letter-spacing:0.06em;margin-bottom:var(--space-2);}
+.toc-list{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.toc-item{
+  display:flex;align-items:center;gap:var(--space-2);
+  padding:7px var(--space-2);border-radius:var(--radius-xs);
+  text-decoration:none;color:var(--text-primary);
+  font-size:var(--text-label);font-weight:600;
+  transition:background 120ms,color 120ms;min-height:34px;
+}
+.toc-item:hover{background:var(--primary-light);color:var(--primary);}
+.toc-num{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+
+/* ═══ 섹션 ═══ */
+main{counter-reset:sectionNo;display:block;}
+section{
+  display:block;counter-increment:sectionNo;
+  margin-top:var(--space-16);scroll-margin-top:68px;
+}
+section > h2{
+  font-size:var(--text-title-l);font-weight:800;letter-spacing:-0.02em;line-height:1.3;
+  color:var(--text-primary);margin-bottom:var(--space-5);
+}
+section > h2::before{
+  content:counter(sectionNo,decimal-leading-zero);
+  display:block;width:fit-content;margin-bottom:var(--space-2);
+  font-family:var(--mono);
+  font-size:var(--text-caption);font-weight:700;letter-spacing:0.08em;
+  color:var(--text-tertiary);
+}
+h3{
+  font-size:var(--text-title-s);font-weight:700;line-height:1.4;
+  color:var(--text-primary);margin:0 0 var(--space-3);
+}
+p{font-size:var(--text-body);line-height:1.75;color:var(--text-secondary);margin-bottom:var(--space-3);}
+p:last-child{margin-bottom:0;}
+.lead{font-size:17px;line-height:1.7;color:var(--text-primary);}
+strong,b{color:var(--text-primary);font-weight:700;}
+
+/* 인라인 코드 */
+code{font-family:var(--mono);font-size:0.9em;}
+.code,p code,li code,td code,span code{
+  background:var(--code-inline-bg);color:var(--text-primary);
+  padding:2px 5px;border-radius:var(--radius-xs);
+}
+
+/* ═══ 그리드 ═══ */
+.grid{display:grid;gap:var(--space-4);}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr));}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr));}
+.grid.four{grid-template-columns:repeat(4,minmax(0,1fr));}
+
+/* ═══ 카드 ═══ */
+.card{
+  border-radius:var(--radius-lg);border:1px solid var(--border);
+  background:var(--card);padding:var(--space-6);
+}
+.card p,.card .card-desc{color:var(--text-secondary);line-height:1.65;font-size:var(--text-label);}
+.icon{
+  display:inline-flex;align-items:center;
+  padding:3px var(--space-2);border-radius:var(--radius-xs);
+  background:var(--primary-light);color:var(--primary-dark);
+  border:1px solid var(--primary-border);
+  font-size:var(--text-caption);font-weight:700;
+  margin-bottom:var(--space-3);
+}
+
+/* ═══ 도구 로고 ═══ */
+.logo-wall{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--space-3);margin-top:var(--space-4);}
+.logo-tile{
+  display:flex;align-items:center;gap:var(--space-3);
+  min-height:80px;border-radius:var(--radius-md);
+  border:1px solid var(--border);padding:var(--space-4);background:var(--card);
+}
+.brand-svg{width:34px;height:34px;flex:0 0 auto;}
+.logo-tile b{display:block;color:var(--text-primary);font-size:var(--text-label);line-height:1.3;}
+.logo-tile span{display:block;color:var(--text-secondary);font-size:var(--text-caption);margin-top:2px;line-height:1.4;}
+
+/* ═══ 화면 캡처 ═══ */
+.shot-card{
+  border-radius:var(--radius-lg);border:1px solid var(--border);
+  background:var(--card);overflow:hidden;
+}
+.shot-card.phone{max-width:420px;justify-self:center;}
+.inline-shot{display:block;width:100%;height:auto;background:var(--card-alt);}
+
+/* ═══ 표 ═══ */
+table{
+  width:100%;border-collapse:collapse;margin:var(--space-5) 0;
+  border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;
+  background:var(--card);
+}
+th,td{
+  padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border);
+  text-align:left;vertical-align:top;font-size:var(--text-label);line-height:1.65;
+  color:var(--text-secondary);
+}
+th{background:var(--card-alt);color:var(--text-secondary);font-weight:700;font-size:12px;}
+td strong,td b{color:var(--text-primary);}
+tr:last-child td{border-bottom:0;}
+
+/* ═══ 필드 카드 ═══ */
+.field-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-3);margin-top:var(--space-4);}
+.field{
+  border-radius:var(--radius-md);border:1px solid var(--border);
+  background:var(--card);padding:var(--space-4);min-height:96px;
+}
+.field b{display:block;color:var(--primary-dark);font-family:var(--mono);font-size:var(--text-label);margin-bottom:var(--space-1);}
+.field span{color:var(--text-secondary);font-size:var(--text-caption);line-height:1.55;}
+
+/* ═══ 배지 ═══ */
+.badge-row{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-4);}
+.badge{
+  display:inline-flex;align-items:center;
+  border-radius:var(--radius-full);
+  background:var(--card);border:1px solid var(--border);
+  padding:5px var(--space-3);color:var(--text-secondary);
+  font-size:12px;font-weight:600;line-height:1.4;
+}
+.badge.new{background:var(--primary-light);border-color:var(--primary-border);color:var(--primary-dark);}
+.badge.security{background:var(--primary-light);border-color:var(--primary-border);color:var(--primary-dark);}
+
+/* ═══ 콜아웃 ═══ */
+.callout{
+  padding:var(--space-6);border-radius:var(--radius-lg);
+  border:1px solid var(--primary-border);background:var(--primary-light);
+  margin:var(--space-5) 0;
+}
+.callout h3{color:var(--primary-dark);}
+.callout p{color:var(--primary-dark);}
+
+/* ═══ 도식 ═══ */
+.diagram-wrap{
+  margin:var(--space-5) 0;padding:var(--space-6);
+  border-radius:var(--radius-lg);border:1px solid var(--border);
+  background:var(--card);overflow-x:auto;
+}
+.mermaid svg{max-width:100%;height:auto;}
+
+/* ═══ 보안 도식 ═══ */
+.sec-flow{display:grid;grid-template-columns:1fr 116px 1fr;gap:0;align-items:center;margin:var(--space-5) 0;}
+.sec-side{display:flex;flex-direction:column;gap:var(--space-2);}
+.sec-node{
+  border-radius:var(--radius-md);border:1px solid var(--border);
+  padding:var(--space-3) var(--space-4);background:var(--card);
+  font-size:var(--text-label);color:var(--text-secondary);line-height:1.6;
+}
+.sec-node b{display:block;color:var(--text-primary);margin-bottom:2px;font-size:var(--text-label);}
+.sec-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-1);}
+.sec-caddy{
+  border-radius:var(--radius-md);border:1px solid var(--primary-border);
+  padding:var(--space-3) var(--space-2);background:var(--primary-light);text-align:center;
+}
+.sec-caddy b{display:block;color:var(--primary-dark);font-size:var(--text-label);margin-bottom:2px;}
+.sec-caddy span{color:var(--primary-dark);font-size:var(--text-caption);line-height:1.5;}
+.sec-arrow{display:flex;flex-direction:column;align-items:center;gap:var(--space-1);font-size:var(--text-caption);color:var(--text-tertiary);font-weight:600;}
+.sec-arrow-line{width:2px;height:22px;background:var(--border-strong);position:relative;}
+.sec-badge{
+  display:inline-flex;align-items:center;gap:var(--space-1);
+  padding:3px var(--space-2);border-radius:var(--radius-xs);
+  font-size:var(--text-caption);font-weight:700;
+}
+.sec-badge.open{background:var(--success-light);color:var(--success-dark);border:1px solid var(--success-border);}
+.sec-badge.blocked{background:var(--error-light);color:var(--error-dark);border:1px solid var(--error-border);}
+
+/* ═══ 핵심 포인트 (섹션 요지를 먼저 보여준다) ═══ */
+.keypoints{display:grid;gap:var(--space-2);margin:var(--space-5) 0;}
+.keypoint{
+  display:flex;gap:var(--space-4);align-items:flex-start;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);
+}
+.keypoint-tag{
+  flex:0 0 auto;min-width:76px;text-align:center;
+  font-size:var(--text-caption);font-weight:800;letter-spacing:0.02em;
+  color:var(--primary-dark);background:var(--primary-light);
+  border:1px solid var(--primary-border);border-radius:var(--radius-xs);
+  padding:4px var(--space-2);margin-top:2px;
+}
+.keypoint-body{font-size:var(--text-label);line-height:1.7;color:var(--text-secondary);}
+.keypoint-body b{color:var(--text-primary);font-weight:700;}
+
+/* ═══ 안내 박스 (기존 인라인 border-left 대체) ═══ */
+.note{
+  padding:var(--space-4) var(--space-5);border-radius:var(--radius-md);
+  border:1px solid var(--border);background:var(--card-alt);
+}
+.note b{display:block;margin-bottom:var(--space-1);}
+
+/* ═══ 푸터 ═══ */
+footer{
+  max-width:1040px;margin:var(--space-16) auto 0;
+  padding:var(--space-6) var(--space-8) var(--space-12);
+  border-top:1px solid var(--border);
+  color:var(--text-tertiary);font-size:12px;line-height:1.7;
+}
+footer strong{color:var(--text-secondary);}
+
+/* ═══ 반응형 ═══ */
+@media (max-width:900px){
+  .grid.four,.field-grid,.logo-wall{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .sec-flow{grid-template-columns:1fr;}
+  .toc-list{grid-template-columns:1fr;}
+}
+@media (max-width:720px){
+  .wrap{padding:0 var(--space-4) 64px;}
+  .project-header{padding-left:var(--space-4)!important;padding-right:var(--space-4)!important;}
+  footer{padding-left:var(--space-4);padding-right:var(--space-4);}
+  header{padding:var(--space-6) var(--space-5);}
+  h1{font-size:var(--text-title-l);}
+  section > h2{font-size:var(--text-title-m);}
+  .grid.two,.grid.three,.grid.four,
+  .hero-map,.field-grid,.logo-wall{grid-template-columns:1fr;}
+  table{display:block;overflow-x:auto;}
+}
 
-    :root {
-      --ink: #142033;
-      --muted: #667085;
-      --line: #d8e1ee;
-      --paper: #ffffff;
-      --wash: #f5f8fc;
-      --blue: #2563eb;
-      --cyan: #2563eb;
-      --green: #16836b;
-      --amber: #b7791f;
-      --rose: #c2415d;
-      --dark: #101827;
-      --purple: #334155;
-      --oracle: #c0392b;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: "Pretendard", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-      color: #172033;
-      background:
-        linear-gradient(90deg, rgba(15,23,42,.035) 1px, transparent 1px),
-        linear-gradient(rgba(15,23,42,.035) 1px, transparent 1px),
-        #eef2f6;
-      background-size: 32px 32px;
-      word-break: keep-all;
-      overflow-wrap: break-word;
-      padding: 28px;
-    }
-
-    .deck {
-      width: min(1240px, calc(100vw - 56px));
-      margin: 0 auto;
-      border-radius: 8px;
-      background: #fff;
-      box-shadow: 0 22px 70px rgba(15,23,42,.18);
-      overflow: hidden;
-    }
-
-    header {
-      position: relative;
-      padding: 72px 72px 54px;
-      background:
-        linear-gradient(115deg, rgba(13,22,38,.96), rgba(24,45,73,.94)),
-        #111827;
-    }
-
-    header::after {
-      content: "AI AUTOMATION CASE · v5";
-      position: absolute;
-      right: 72px; top: 42px;
-      color: rgba(255,255,255,.26);
-      font-weight: 900;
-      font-size: 0.78rem;
-      letter-spacing: .18em;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: rgba(96,165,250,.12);
-      color: #93c5fd;
-      border-left: 4px solid #60a5fa;
-      font-size: .82rem;
-      font-weight: 900;
-    }
-
-    h1 {
-      max-width: 980px;
-      margin-top: 28px;
-      font-size: clamp(2.6rem, 4.4vw, 3.9rem);
-      line-height: 1.18;
-      font-weight: 900;
-      color: #fff;
-      text-wrap: balance;
-    }
-
-    .subtitle {
-      max-width: 860px;
-      margin-top: 24px;
-      color: #d7dee9;
-      font-size: clamp(1.02rem, 1.35vw, 1.2rem);
-      line-height: 1.85;
-    }
-
-    .hero-map {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      max-width: 860px;
-      gap: 14px;
-      margin-top: 34px;
-    }
-
-    .hero-panel {
-      border-radius: 8px;
-      background: rgba(255,255,255,.08);
-      padding: 20px 22px;
-    }
-
-    .hero-panel h2 {
-      font-size: .86rem;
-      color: #93c5fd;
-      margin-bottom: 8px;
-      font-weight: 900;
-      letter-spacing: .02em;
-    }
-
-    .hero-panel p {
-      font-size: 1rem;
-      line-height: 1.75;
-      color: #f3f7fb;
-    }
-
-    /* ─── MAIN ─── */
-    main {
-      counter-reset: sectionNo;
-      padding: 0;
-    }
-
-    section {
-      display: block;
-      counter-increment: sectionNo;
-      padding: 58px 72px;
-      border-bottom: 1px solid #e4e9f1;
-      background: #fff;
-    }
-
-    section:nth-child(even) { background: #f8fafc; }
-
-    section > h2 {
-      position: static;
-      max-width: 850px;
-      margin: 0 0 28px;
-      padding: 0;
-      border: 0;
-      color: #111827;
-      font-size: clamp(1.75rem, 2.6vw, 2.35rem);
-      line-height: 1.34;
-      font-weight: 900;
-      text-wrap: balance;
-    }
-
-    section > h2::before {
-      content: counter(sectionNo, decimal-leading-zero);
-      display: block;
-      width: fit-content;
-      margin-bottom: 10px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: #e8f1ff;
-      color: #2563eb;
-      font-size: .8rem;
-      line-height: 1.4;
-      font-weight: 900;
-      font-family: Consolas, "Cascadia Code", monospace;
-    }
-
-    h3 {
-      margin: 0 0 10px;
-      color: #182235;
-      font-size: 1.08rem;
-      line-height: 1.45;
-      font-weight: 900;
-    }
-
-    p {
-      font-size: 1.02rem;
-      line-height: 1.86;
-      max-width: 860px;
-      color: #596579;
-      margin-bottom: 12px;
-    }
-
-    .lead {
-      max-width: 960px;
-      color: #253044;
-      font-size: 1.12rem;
-      line-height: 1.78;
-    }
-
-    strong { color: #182235; }
-
-    /* ─── GRID ─── */
-    .grid { display: grid; gap: 18px; }
-    .grid.two  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid.three{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .grid.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-
-    /* ─── CARD ─── */
-    .card {
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      background: #fff;
-      padding: 22px;
-      box-shadow: 0 10px 28px rgba(15,23,42,.06);
-    }
-
-    .card::before {
-      content: "";
-      display: block;
-      width: 44px; height: 4px;
-      border-radius: 999px;
-      background: #2563eb;
-      margin-bottom: 18px;
-    }
-
-    .grid.four .card:nth-child(2n)::before,
-    .grid.three .card:nth-child(2n)::before { background: #16836b; }
-    .grid.four .card:nth-child(3n)::before,
-    .grid.three .card:nth-child(3n)::before { background: #b7791f; }
-
-    .card p, .card .card-desc { color: #596579; line-height: 1.75; font-size: .98rem; }
-
-    .icon {
-      display: inline-flex;
-      padding: 5px 9px;
-      border-radius: 999px;
-      background: #eef5ff;
-      color: #2563eb;
-      font-size: .82rem;
-      font-weight: 900;
-      margin-bottom: 16px;
-    }
-
-    /* ─── SPLIT ─── */
-    .split {
-      display: grid;
-      grid-template-columns: minmax(330px,.9fr) minmax(420px,1.1fr);
-      gap: 28px;
-      align-items: start;
-    }
-
-    /* ─── MINI FLOW ─── */
-    .mini-flow { display: grid; gap: 12px; margin-top: 12px; }
-    .mini-step {
-      border-radius: 8px;
-      background: #f5f8fc;
-      box-shadow: inset 4px 0 0 #2563eb;
-      padding: 15px 18px;
-      font-weight: 800;
-      color: #334155;
-      line-height: 1.55;
-    }
-
-    /* ─── LOGO WALL ─── */
-    .logo-wall {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 18px;
-    }
-
-    .logo-tile {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-height: 88px;
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      padding: 16px;
-      background: #fff;
-      box-shadow: 0 8px 20px rgba(15,23,42,.055);
-    }
-
-    .brand-svg { width: 38px; height: 38px; flex: 0 0 auto; }
-
-    .logo-tile b { display: block; color: #172033; font-size: .98rem; line-height: 1.25; }
-    .logo-tile span { display: block; color: #596579; font-size: .82rem; margin-top: 2px; }
-
-    /* ─── SCREENSHOT ─── */
-    .screenshot-grid {
-      display: grid;
-      grid-template-columns: minmax(0,1.45fr) minmax(300px,.65fr);
-      gap: 24px;
-      align-items: start;
-      margin-top: 20px;
-    }
-
-    .shot-card {
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      background: #fff;
-      overflow: hidden;
-      box-shadow: 0 10px 28px rgba(15,23,42,.06);
-    }
-
-    .shot-card h3 {
-      margin: 0;
-      padding: 16px 18px;
-      background: #f1f5fb;
-      border-bottom: 1px solid #dbe3ee;
-      font-size: 1.05rem;
-    }
-
-    .shot-card.phone { max-width: 430px; justify-self: center; }
-
-    .inline-shot { display: block; width: 100%; height: auto; background: #f8fafc; }
-
-    .shot-caption { padding: 16px 18px 18px; color: #596579; font-size: .95rem; line-height: 1.75; }
-
-    /* ─── TABLE ─── */
-    table { width: 100%; border-collapse: collapse; margin: 18px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 28px rgba(15,23,42,.06); }
-    th, td { padding: 16px 18px; border-bottom: 1px solid #dbe3ee; text-align: left; vertical-align: top; font-size: .96rem; line-height: 1.7; }
-    th { background: #f1f5fb; color: #172033; font-weight: 900; }
-    tr:last-child td { border-bottom: 0; }
-
-    /* ─── FIELD GRID ─── */
-    .field-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-top: 16px; }
-    .field {
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      background: #fff;
-      padding: 16px;
-      min-height: 100px;
-      box-shadow: 0 6px 16px rgba(15,23,42,.05);
-    }
-    .field b { display: block; color: #2563eb; font-family: Consolas,"Cascadia Code",monospace; font-size: .92rem; margin-bottom: 5px; }
-    .field span { color: #596579; font-size: .88rem; line-height: 1.55; }
-    .field.telegram-only { border-color: #fcd34d; }
-    .field.telegram-only b { color: #92400e; }
-
-    /* ─── SWIMLANE ─── */
-    .swimlane {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(150px,1fr));
-      gap: 12px;
-      margin: 20px 0;
-    }
-
-    .lane { border-radius: 8px; border: 1px solid #dbe3ee; overflow: hidden; background: #fff; box-shadow: 0 8px 22px rgba(15,23,42,.06); }
-    .lane-title { padding: 10px 14px; background: #f1f5fb; color: #172033; font-weight: 900; font-size: .95rem; border-bottom: 1px solid #dbe3ee; }
-    .lane-body { padding: 12px; color: #596579; font-size: .93rem; line-height: 1.65; }
-
-    /* ─── BADGE ─── */
-    .badge-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-    .badge {
-      border-radius: 999px;
-      background: #f3f7fb;
-      border: 1px solid #dbe3ee;
-      padding: 7px 13px;
-      color: #1f2937;
-      font-size: .9rem;
-      font-weight: 800;
-      line-height: 1.4;
-    }
-    .badge.new { background: #e8f1ff; border-color: #bcd0ff; color: #1d4ed8; }
-    .badge.security { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
-
-    /* ─── COMMAND ─── */
-    .command-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin: 18px 0; }
-    .command { border-radius: 8px; border: 1px solid #dbe3ee; padding: 20px; background: #fff; box-shadow: 0 8px 22px rgba(15,23,42,.05); }
-    .command strong { display: block; margin-bottom: 8px; font-size: 1.05rem; color: #172033; }
-    .command code {
-      display: block; width: fit-content; max-width: 100%;
-      margin-top: 12px; border-radius: 6px;
-      padding: 7px 10px;
-      background: #111827; color: #f9fafb;
-      font-family: Consolas,"Cascadia Code",monospace; font-size: .88rem;
-      line-height: 1.5; white-space: normal;
-    }
-
-    /* ─── CALLOUT ─── */
-    .callout {
-      padding: 22px 24px;
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      background: #fff;
-      box-shadow: 0 12px 30px rgba(15,23,42,.07);
-      margin: 18px 0;
-    }
-
-    /* ─── DIAGRAM WRAP ─── */
-    .diagram-wrap {
-      margin: 20px 0;
-      padding: 28px;
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      background: radial-gradient(circle at 20% 10%, rgba(37,99,235,.06), transparent 18rem), #fff;
-      overflow-x: auto;
-      box-shadow: 0 8px 22px rgba(15,23,42,.06);
-    }
-
-    .mermaid svg { max-width: 100%; height: auto; }
-
-    /* ─── PIPELINE FLOW (custom) ─── */
-    .pipe-flow {
-      display: flex;
-      align-items: flex-start;
-      gap: 0;
-      overflow-x: auto;
-      padding: 4px 0 8px;
-    }
-
-    .pipe-stage {
-      flex: 1;
-      min-width: 148px;
-      border-radius: 10px;
-      border: 1px solid #dbe3ee;
-      background: #fff;
-      box-shadow: 0 8px 22px rgba(15,23,42,.07);
-      overflow: hidden;
-    }
-
-    .pipe-stage-hd {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      font-size: .72rem;
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: #fff;
-    }
-
-    .pipe-stage-hd .pnum {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.28);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .68rem; font-weight: 900;
-    }
-
-    .pipe-stage-bd { padding: 13px 14px 16px; }
-    .pipe-stage-name { font-weight: 900; font-size: .96rem; color: #182235; margin-bottom: 5px; line-height: 1.3; }
-    .pipe-stage-detail { font-size: .82rem; color: #596579; line-height: 1.55; }
-
-    .pipe-conn {
-      flex: 0 0 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #b0bec8;
-      font-size: 1.1rem;
-      padding-top: 18px;
-    }
-
-    /* ─── BRANCH CASE (n8n 내부 처리) ─── */
-    .branch-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin: 8px 0 20px;
-    }
-
-    .bcase {
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      background: #fff;
-      overflow: hidden;
-      box-shadow: 0 6px 18px rgba(15,23,42,.06);
-    }
-
-    .bcase-hd {
-      padding: 10px 15px;
-      font-size: .8rem;
-      font-weight: 900;
-      color: #fff;
-      letter-spacing: .04em;
-    }
-
-    .bcase-bd { padding: 14px 15px; }
-
-    .bcase-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 9px;
-      padding: 7px 0;
-      border-bottom: 1px solid #f0f3f8;
-      font-size: .88rem;
-      color: #475569;
-      line-height: 1.5;
-    }
-
-    .bcase-step:last-child { border-bottom: 0; }
-
-    .bstep-dot {
-      flex: 0 0 auto;
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      margin-top: 7px;
-    }
-
-    /* ─── SECURITY DIAGRAM ─── */
-    .sec-flow {
-      display: grid;
-      grid-template-columns: 1fr 80px 1fr;
-      gap: 0;
-      align-items: center;
-      margin: 20px 0;
-    }
-
-    .sec-side { display: flex; flex-direction: column; gap: 10px; }
-
-    .sec-node {
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      padding: 12px 16px;
-      background: #fff;
-      box-shadow: 0 6px 16px rgba(15,23,42,.06);
-      font-size: .92rem;
-    }
-
-    .sec-node b { display: block; color: #182235; margin-bottom: 3px; font-size: .98rem; }
-
-    .sec-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-
-    .sec-caddy {
-      border-radius: 10px;
-      border: 2px solid #2563eb;
-      padding: 14px 10px;
-      background: #ecfeff;
-      text-align: center;
-    }
-
-    .sec-caddy b { display: block; color: #0e7490; font-size: .95rem; margin-bottom: 4px; }
-    .sec-caddy span { color: #155e75; font-size: .8rem; line-height: 1.5; }
-
-    .sec-arrow {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      font-size: .75rem;
-      color: #64748b;
-      font-weight: 700;
-    }
-
-    .sec-arrow-line {
-      width: 2px;
-      height: 22px;
-      background: #cbd5e1;
-      position: relative;
-    }
-
-    .sec-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: .72rem;
-      font-weight: 900;
-    }
-
-    .sec-badge.open { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-    .sec-badge.blocked { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-
-    /* ─── CALENDAR MODE GRID ─── */
-    .cal-modes {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 14px;
-      margin: 20px 0;
-    }
-
-    .cal-mode {
-      border-radius: 8px;
-      border: 1px solid #dbe3ee;
-      background: #fff;
-      overflow: hidden;
-      box-shadow: 0 6px 16px rgba(15,23,42,.06);
-    }
-
-    .cal-mode-hd {
-      padding: 10px 15px;
-      font-size: .78rem;
-      font-weight: 900;
-      color: #fff;
-      letter-spacing: .04em;
-    }
-
-    .cal-mode-bd { padding: 14px 15px; }
-    .cal-mode-bd p { font-size: .88rem; color: #475569; line-height: 1.55; margin: 0 0 8px; max-width: none; }
-    .cal-mode-bd code {
-      display: block; padding: 7px 10px; border-radius: 6px;
-      background: #111827; color: #a5f3fc;
-      font-family: Consolas,"Cascadia Code",monospace;
-      font-size: .82rem; line-height: 1.5; margin-top: 8px;
-    }
-
-    /* ─── FOOTER ─── */
-    footer {
-      padding: 28px 72px;
-      background: #111827;
-      color: rgba(255,255,255,.75);
-      font-size: .95rem;
-      line-height: 1.65;
-    }
-
-    footer strong { color: #fff; }
-
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 880px) {
-      body { padding: 0; }
-      .deck { width: 100%; border-radius: 0; }
-      header, section, footer { padding-left: 24px; padding-right: 24px; }
-      h1 { font-size: clamp(2.15rem, 10vw, 3.15rem); }
-      .hero-map, .split, .grid.two, .grid.three, .grid.four, .grid.five,
-      .command-grid, .field-grid, .logo-wall, .screenshot-grid,
-      .swimlane, .branch-grid, .cal-modes, .sec-flow { grid-template-columns: 1fr; }
-      .pipe-flow { flex-direction: column; }
-      .pipe-conn { transform: rotate(90deg); padding: 0; }
-      table { display: block; overflow-x: auto; }
-    }
   </style>
 </head>
 <body>
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="ic-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol><symbol id="ic-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol><symbol id="ic-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol><symbol id="ic-cal" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol><symbol id="ic-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9Z"/></symbol><symbol id="ic-bot" viewBox="0 0 24 24"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></symbol><symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/><path d="M2 12h20"/></symbol><symbol id="ic-folder" viewBox="0 0 24 24"><path d="M20 17a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.9a2 2 0 0 1-1.7-.9l-.8-1.2a2 2 0 0 0-1.7-.9H8a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2Z"/><path d="M2 8v11a2 2 0 0 0 2 2h14"/></symbol><symbol id="ic-clip" viewBox="0 0 24 24"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6A4 4 0 1 1 18 8.8l-8.6 8.6a2 2 0 0 1-2.8-2.9l8.5-8.4"/></symbol><symbol id="ic-book" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol><symbol id="ic-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol><symbol id="ic-board" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol><symbol id="ic-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.2 7.8 14.1 14.1 7.8 16.2 9.9 9.9 16.2 7.8"/></symbol><symbol id="ic-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol></svg>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="ic-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol><symbol id="ic-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol><symbol id="ic-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol><symbol id="ic-cal" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol><symbol id="ic-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9Z"/></symbol><symbol id="ic-bot" viewBox="0 0 24 24"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></symbol><symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/><path d="M2 12h20"/></symbol><symbol id="ic-folder" viewBox="0 0 24 24"><path d="M20 17a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.9a2 2 0 0 1-1.7-.9l-.8-1.2a2 2 0 0 0-1.7-.9H8a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2Z"/><path d="M2 8v11a2 2 0 0 0 2 2h14"/></symbol><symbol id="ic-clip" viewBox="0 0 24 24"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l8.6-8.6A4 4 0 1 1 18 8.8l-8.6 8.6a2 2 0 0 1-2.8-2.9l8.5-8.4"/></symbol><symbol id="ic-book" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol><symbol id="ic-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol><symbol id="ic-board" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol><symbol id="ic-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.2 7.8 14.1 14.1 7.8 16.2 9.9 9.9 16.2 7.8"/></symbol><symbol id="ic-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5A5.8 5.8 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol><symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol><symbol id="ic-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol></svg>
 
-  <div class="deck">
+  <div class="project-header">
+    <span class="ph-name">AI 개인비서 자동화</span>
+    <span class="ph-sep">·</span>
+    <span class="ph-desc">텔레그램 대화를 개인 데이터베이스와 일정으로 자동 연결한 시스템 구현 기록</span>
+  </div>
+  <nav class="toc-floating" id="tocFloating">
+    <div class="toc-floating-title">목차</div>
+  </nav>
 
-    <!-- ═══════════ HEADER ═══════════ -->
+  <div class="wrap">
+
+    <!-- ═══════════ 히어로 ═══════════ -->
     <header>
-      <div class="eyebrow">AI Automation System · Oracle Cloud · mTLS 보안</div>
-      <h1>텔레그램으로 대화하는 AI 개인비서 자동화 시스템</h1>
+      <div class="eyebrow">AI 자동화 시스템 · Oracle Cloud · mTLS 보안</div>
+      <h1>정보를 아카이브하고 일정을 관리해주는<br>나만의 비서</h1>
       <p class="subtitle">
-        메시지·이미지·문서·링크를 채팅창에 보내면 AI가 내용을 이해하고
-        분류·요약·저장·달력 등록·리마인드까지 이어주는 개인 정보 관리 자동화입니다.<br>
-        n8n은 오라클 클라우드 서버에서 상시 가동되며, mTLS 인증서로 접근을 통제합니다.
+        메모·일정·기프티콘·자료가 도구마다 흩어지고 분류는 수동이라 기억에 의존했습니다.<br>
+        채팅에 던져두면 알아서 분류·저장하고 필요한 것을 먼저 알려주는 개인용 비서를<br>
+        직접 설계·개발해 클라우드 서버에 띄우고 24시간 운영하고 있습니다.
       </p>
       <div class="hero-map">
         <div class="hero-panel">
-          <h2>한 문장 정의</h2>
-          <p>채팅형 입력창을 개인 데이터베이스와 AI 분석 엔진에 연결한 자동화 비서입니다.</p>
+          <h2>Telegram</h2>
+          <p>자료·일정·기프티콘 입력 창구</p>
         </div>
         <div class="hero-panel">
-          <h2>핵심 가치</h2>
-          <p>입력은 메신저처럼 가볍게, 저장은 DB처럼 구조적으로, 달력과 리마인드는 자동으로.</p>
+          <h2>n8n + Claude Code</h2>
+          <p>내용을 읽고 분류해 아래 처리를 실행</p>
         </div>
         <div class="hero-panel">
-          <h2>인프라</h2>
-          <p>Oracle Cloud Always Free VM · 전용 도메인 · Caddy mTLS 단말 인증서 보안</p>
+          <h2>Oracle Cloud</h2>
+          <p>n8n이 24시간 구동되는 클라우드 서버</p>
         </div>
         <div class="hero-panel">
-          <h2>Phase 1 강화</h2>
-          <p>일정 특화 분석 — title suffix 정책, summary 고정 양식, Calendar 3가지 등록 모드</p>
+          <h2>Google</h2>
+          <p>Calendar와 Sheets에 저장·관리</p>
         </div>
       </div>
     </header>
 
-    <main>
+    <div class="toc-card">
+      <div class="toc-label">이 문서의 구성</div>
+      <div class="toc-list" id="toc-list"></div>
+    </div>
 
-      <!-- ═══════════ 01 뭘 만든 건가 ═══════════ -->
-      <section>
-        <h2>뭘 만든 건가</h2>
-        <div class="split">
-          <div>
-            <p class="lead">
-              이 프로젝트는 텔레그램 봇을 인터페이스로 쓰고, n8n이 전체 자동화 흐름을 제어하며,
-              AI API와 Google 서비스를 연결해 개인 지식과 파일을 정리하는 시스템입니다.
-              n8n은 오라클 클라우드 Always Free VM에서 24시간 상시 가동됩니다.
-            </p>
-            <div class="mini-flow">
-              <div class="mini-step">1. 텔레그램에 정보 전송 (텍스트·이미지·PDF·링크)</div>
-              <div class="mini-step">2. AI가 제목, 분류, 요약, 키워드, 날짜·시간 추출</div>
-              <div class="mini-step">3. Google Sheets에 검색 가능한 인덱스 저장</div>
-              <div class="mini-step">4. 일정/할일이면 Google Calendar 자동 등록</div>
-              <div class="mini-step">5. 결과를 텔레그램으로 다시 안내</div>
-            </div>
+    <main>
+      <section data-nav="처리 기능">
+        <h2>이런 걸 처리합니다</h2>
+        <p class="lead">채팅에 던지는 행동 하나로 <strong>분류 · 저장 · 일정 등록 · 알림</strong>까지 이어집니다.</p>
+        <div class="grid three">
+          <div class="card">
+            <div class="icon">01</div>
+            <h3>자료 아카이브</h3>
+            <p class="card-desc">링크·이미지·문서를 보내면 내용을 분석해 자동으로 분류·저장합니다.</p>
           </div>
-          <div class="diagram-wrap">
-            <div class="mermaid">
-flowchart TB
-  A["채팅 입력"] --> B["AI 분석"]
-  B --> C["구조화 데이터"]
-  C --> D["Sheets 인덱스"]
-  C --> E["Drive 파일"]
-  C --> F["Calendar 일정"]
-  D --> G["조회·수정·삭제"]
-  E --> G
-  F --> G
-  G --> H["텔레그램 응답"]
-            </div>
+          <div class="card">
+            <div class="icon">02</div>
+            <h3>일정 등록</h3>
+            <p class="card-desc">자연어로 보낸 일정에서 날짜·시간·장소를 파악해 Google Calendar에 자동 등록합니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">03</div>
+            <h3>기프티콘 관리</h3>
+            <p class="card-desc">이미지에서 유효기간과 사용처를 추출해 등록하고, 만료 전에 알립니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">04</div>
+            <h3>자료 검색</h3>
+            <p class="card-desc">"저번주에 넣어둔 거 뭐였지" 같은 대화로 저장해 둔 것을 찾습니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">05</div>
+            <h3>아침 일정 보고</h3>
+            <p class="card-desc">오늘의 일정·만료 임박 항목·주요 할 일을 매일 아침 먼저 알립니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">06</div>
+            <h3>저장 결과 회신</h3>
+            <p class="card-desc">어느 카테고리에 어떤 제목으로 저장했는지 즉시 회신해, 잘못 분류되면 바로 잡을 수 있습니다.</p>
           </div>
         </div>
       </section>
 
-      <!-- ═══════════ 02 Claude Code로 만든 자동화 ═══════════ -->
-      <section>
-        <h2>Claude Code로 만든 자동화 프로젝트</h2>
-        <p class="lead">
-          Claude Code를 개발 파트너로 활용해 n8n 워크플로우, API 연동, 서버 인프라 구성,
-          mTLS 보안, Google 서비스 연결, 테스트 자동화 흐름을 구성했습니다.
-        </p>
-        <div class="logo-wall">
+      <section data-nav="실제 화면">
+        <h2>실제 화면</h2>
+        <p class="lead">아침 모닝 리포트부터 자료 저장·일정 등록까지, 하나의 대화창 안에서 끝납니다.</p>
+        <div class="shot-card phone">
+          <img class="inline-shot" src="assets/telegram-morning-report.png" alt="텔레그램 대화 화면 — 모닝 리포트, 링크 저장 결과 회신, 일정 등록 및 캘린더 연동">
+        </div>
+      </section>
+
+      <section data-nav="전체 구조">
+        <h2>전체 구조와 흐름</h2>
+        <p class="lead">메시지 한 건이 거치는 경로 전체입니다. <strong>AI는 두 지점에서만 개입</strong>하고, 나머지는 n8n 룰이 처리합니다.</p>
+
+        <div class="diagram-wrap">
+          <div class="mermaid">
+flowchart TB
+  U["사용자<br/>텔레그램"] --> PRE["n8n 전처리<br/>입력 유형 판별"]
+  PRE -->|"파일 · 버튼 · 명시 접두어"| GUARD
+  PRE -->|"자연어 문장"| AI1["AI 의도분류<br/>저장·조회·수정·삭제·완료"]
+  AI1 --> GUARD["n8n 가드레일<br/>강등 · 폴백"]
+  GUARD --> AI2["AI 본분석<br/>제목·분류·요약·날짜 추출"]
+  AI2 --> SAVE["저장 · 실행"]
+  SAVE --> SH["Google Sheets<br/>색인 DB"]
+  SAVE --> DR["Google Drive<br/>파일 보관"]
+  SAVE --> CA["Google Calendar<br/>일정 등록"]
+  SAVE --> RE["텔레그램 회신<br/>저장 결과 즉시 확인"]
+  SCH["매일 08:00 스케줄"] --> MR["모닝 리포트<br/>날씨 · 일정 · 추천"]
+  MR --> RE
+  GUARD -.->|"판정 기록"| LOG["판정 로그"]
+          </div>
+        </div>
+
+        <h3 style="margin-top:32px;">도구별 역할</h3>
+        <table>
+          <thead>
+            <tr><th style="width:22%">도구</th><th>맡은 일</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Telegram</strong></td><td>자료를 받는 창구이자 모닝 리포트를 발송하는 채널. 버튼·명령어로 즉시 조회도 처리</td></tr>
+            <tr><td><strong>n8n</strong></td><td>룰베이스 분기와 스케줄 트리거로 전체 파이프라인을 연결. AI 장애 시 폴백 담당</td></tr>
+            <tr><td><strong>OpenAI</strong></td><td>일상 문장에서 의도를 분류하고 제목·카테고리·기한을 추출하는 판정 담당</td></tr>
+            <tr><td><strong>Oracle Cloud</strong></td><td>n8n 컨테이너가 24시간 구동되는 서버. 재부팅에도 자동 기동되도록 구성</td></tr>
+            <tr><td><strong>Google</strong></td><td>Sheets를 DB로 써서 분류된 항목을 저장하고, 일정은 Calendar에, 파일은 Drive에 보관</td></tr>
+            <tr><td><strong>Claude Code</strong></td><td>워크플로우·API 연동·서버 인프라·보안 설정을 함께 만든 개발 파트너</td></tr>
+          </tbody>
+        </table>
+
+<div class="logo-wall">
           <!-- Row 1 -->
           <div class="logo-tile">
             <svg class="brand-svg" fill="#D97757" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Claude</title><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>
@@ -749,8 +545,191 @@ flowchart TB
         </div>
       </section>
 
-      <!-- ═══════════ 03 오라클 클라우드 인프라 & mTLS 보안 ═══════════ -->
-      <section>
+      <section data-nav="룰 · AI 분담">
+        <h2>룰과 AI의 역할 분담</h2>
+        <p class="lead">정해진 프로세스는 <strong>n8n 룰이 강제</strong>하고, 대화의 변수만 <strong>AI가 판정</strong>합니다.</p>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="icon">n8n</div>
+            <h3>정해진 프로세스의 강제</h3>
+            <p class="card-desc">의도가 정해지면 카테고리 읽기 → 내용 분석 → 시트 저장 → 캘린더 등록까지 정해진 순서로만 진행합니다. 버튼 응답과 명시 명령은 AI 판정을 거치지 않고 룰이 즉시 처리합니다.</p>
+            <p class="card-desc" style="margin-top:12px;"><strong>얻은 것 — 같은 요청은 언제나 같은 결과</strong></p>
+          </div>
+          <div class="card">
+            <div class="icon">AI</div>
+            <h3>대화의 자유도</h3>
+            <p class="card-desc">정해진 명령어 없이 일상 문장에서 의도를 분류하고, "스벅" 같은 표현을 "스타벅스"로 연결합니다. 이미지·PDF도 읽어 브랜드·유효기간 같은 정보를 추출합니다.</p>
+            <p class="card-desc" style="margin-top:12px;"><strong>얻은 것 — 말하듯 던져도 알아듣는 유연함</strong></p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:32px;">AI를 태우지 않는 경우</h3>
+        <p>다음은 의도가 이미 확정이라 AI 호출 자체를 건너뜁니다. 호출 비용과 지연이 없고, 판정이 흔들릴 여지도 없습니다.</p>
+        <div class="badge-row">
+          <span class="badge">파일 · 이미지 · PDF</span>
+          <span class="badge">버튼 응답</span>
+          <span class="badge">수정:</span>
+          <span class="badge">삭제:</span>
+          <span class="badge">메모:</span>
+          <span class="badge">조회:</span>
+          <span class="badge">완료</span>
+        </div>
+
+        <h3 style="margin-top:32px;">AI 판정을 그대로 실행하지 않는다</h3>
+        <p>의도분류 결과는 n8n 룰을 한 번 더 통과합니다. <strong>잘못된 실행보다 잘못된 저장이 낫다</strong>는 기준으로 설계했습니다.</p>
+        <table>
+          <thead>
+            <tr><th style="width:34%">조건</th><th style="width:22%">조치</th><th>이유</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>확신도가 기준에 못 미침</td><td><strong>저장으로 강등</strong></td><td>수정·삭제는 되돌리기 어렵지만 저장은 나중에 지우면 됩니다</td></tr>
+            <tr><td>대상 없는 삭제 요청</td><td><strong>조회로 강등</strong></td><td>후보를 먼저 보여주고 확인받는 경로로 돌립니다</td></tr>
+            <tr><td>AI 응답 실패 · 지연</td><td><strong>룰베이스 폴백</strong></td><td>AI가 멈춰도 비서는 멈추지 않고, 최소한 기록은 남습니다</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section data-nav="모닝 리포트">
+        <h2>매일 아침 모닝 리포트</h2>
+        <p class="lead">이 시스템에서 <strong>유일하게 먼저 말을 거는 기능</strong>입니다. 매일 08:00에 네 가지를 한 통으로 묶어 보냅니다.</p>
+        <div class="grid four">
+          <div class="card">
+            <div class="icon">01</div>
+            <h3>날씨</h3>
+            <p class="card-desc">출근·퇴근 시간대의 기온과 강수확률. 비가 올 확률이 높은 시간대에만 우산 표시를 붙입니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">02</div>
+            <h3>미세먼지</h3>
+            <p class="card-desc">에어코리아가 발표하는 공식 등급을 그대로 표시합니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">03</div>
+            <h3>오늘 일정</h3>
+            <p class="card-desc">오늘과 내일 일정, 기한이 임박한 항목을 함께 보여줍니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">04</div>
+            <h3>오늘의 추천</h3>
+            <p class="card-desc">다시 볼 만한 항목을 하나 골라 띄우고, 확인한 것은 체크 버튼으로 정리합니다.</p>
+          </div>
+        </div>
+        <div class="note" style="margin-top:20px;">
+          <b>알림은 하루 한 통으로 제한했습니다</b>
+          알림이 잦으면 읽지 않게 됩니다. 추천도 여러 종류를 한꺼번에 띄우지 않고 우선순위대로 한 종류만 채택합니다.
+        </div>
+      </section>
+
+      <section data-nav="일정 처리">
+        <h2>일정 처리</h2>
+        <p class="lead">단순 저장을 넘어, 일정 메시지에서 <strong>의미 있는 구조를 추출해</strong> Google Calendar에 정확하게 연결합니다.</p>
+
+        <h3>확정과 미확정을 구분한다</h3>
+        <p>같은 일정이라도 예약이 끝났는지 아직인지에 따라 제목이 달라집니다. 캘린더만 봐도 무엇을 더 해야 하는지 알 수 있습니다.</p>
+        <table>
+          <thead>
+            <tr><th style="width:34%">말투</th><th style="width:20%">판정</th><th>결과 제목</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>"이번주 토요일 테니스야"</td><td><strong>확정</strong></td><td>테니스 일정</td></tr>
+            <tr><td>"까꿍이 병원 가야해"</td><td><strong>미확정</strong></td><td>까꿍이 병원 예약필요</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:32px;">일정 형태에 맞춰 등록 방식을 고른다</h3>
+        <div class="grid three">
+          <div class="card">
+            <div class="icon">01</div>
+            <h3>시간 지정</h3>
+            <p class="card-desc">시작 시간이 있으면 그대로 등록합니다. 종료 시간이 없으면 1시간을 기본값으로 씁니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">02</div>
+            <h3>하루종일</h3>
+            <p class="card-desc">시간 없이 날짜만 있으면 종일 이벤트로 등록합니다.</p>
+          </div>
+          <div class="card">
+            <div class="icon">03</div>
+            <h3>날짜 범위</h3>
+            <p class="card-desc">시작일과 종료일이 다르면 범위 전체를 하나의 이벤트로 등록합니다.</p>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:20px;">
+          <b>한 메시지에 일정이 여러 건이면 쪼개서 등록합니다</b>
+          "테니스 일정 등록해" 뒤에 날짜별 코트가 여러 줄 나열되면, 공통 정보를 각 줄에 붙여 건별로 분해한 뒤 각각 등록합니다.
+        </div>
+      </section>
+
+      <section data-nav="데이터 구조">
+        <h2>저장되는 데이터</h2>
+        <p class="lead">메시지 원문을 그대로 쌓지 않습니다. <strong>검색·수정·자동화에 쓸 수 있는 형태</strong>로 쪼개서 Google Sheets에 넣습니다.</p>
+
+        <table>
+          <thead>
+            <tr><th style="width:26%">시트</th><th style="width:18%">역할</th><th>담기는 것</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>색인 시트</strong></td><td>본체 DB</td><td>저장된 모든 항목. 제목·분류·요약·기한·상태 등</td></tr>
+            <tr><td><strong>분류 사전</strong></td><td>카테고리</td><td>대분류·소분류와 각각의 설명. AI는 이 목록 안에서만 고릅니다</td></tr>
+            <tr><td><strong>판정 로그</strong></td><td>기록</td><td>의도분류 결과 전건. 입력·판정·확신도·근거</td></tr>
+            <tr><td><strong>대기열</strong></td><td>임시</td><td>사용자 확인을 기다리는 중간 상태. 매일 새벽에 정리됩니다</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:32px;">항목마다 남는 값</h3>
+        <div class="field-grid">
+          <div class="field"><b>title</b><span>AI가 만든 짧은 제목</span></div>
+          <div class="field"><b>L1 / L2</b><span>대분류와 소분류</span></div>
+          <div class="field"><b>entities</b><span>검색용 핵심 키워드</span></div>
+          <div class="field"><b>summary</b><span>요약 텍스트</span></div>
+          <div class="field"><b>due_date</b><span>기한 · 일정일</span></div>
+          <div class="field"><b>recurrence</b><span>반복 패턴</span></div>
+          <div class="field"><b>status</b><span>진행 · 완료 · 삭제</span></div>
+          <div class="field"><b>cloud_path</b><span>Drive 파일 경로</span></div>
+        </div>
+
+        <div class="note" style="margin-top:20px;">
+          <b>소분류는 쓰면서 늘어납니다</b>
+          AI가 고를 소분류가 없으면 사용자에게 키워드를 물어보고, 받은 값을 분류 사전에 추가합니다. 다음부터는 그 소분류를 AI가 선택할 수 있습니다.
+        </div>
+      </section>
+
+      <section data-nav="품질 개선">
+        <h2>판정 품질을 올린 방법</h2>
+        <p class="lead">처음엔 <strong>끝말 키워드 룰</strong>로 의도를 판별했습니다. 룰을 늘릴수록 서로 충돌해서, 목록이 아니라 <strong>판정 방식</strong>을 바꿨습니다.</p>
+
+        <h3>오분류를 먼저 모았다</h3>
+        <table>
+          <thead>
+            <tr><th style="width:38%">실제로 보낸 문장</th><th style="width:18%">잘못된 판정</th><th>원인</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>내일 3시 은비랑 저녁 약속 잡아줘</td><td><strong>조회</strong>로 오판</td><td>어미 '~줘'가 조회 룰에 걸림</td></tr>
+            <tr><td>메가커피 기프티콘 썼어</td><td><strong>저장</strong>으로 오판</td><td>'썼어'가 완료 키워드 목록에 없음</td></tr>
+            <tr><td>저번주에 넣어둔 거 뭐였지</td><td><strong>저장</strong>으로 오판</td><td>어떤 룰에도 걸리지 않아 기본값으로 떨어짐</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:32px;">키워드 목록을 의미 정의로 바꿨다</h3>
+        <div class="keypoints">
+          <div class="keypoint">
+            <span class="keypoint-tag">정의</span>
+            <span class="keypoint-body">"어미로 판정하지 말고 <b>행동의 대상</b>으로 판정하라"를 원칙으로 명시했습니다. 새 정보가 있으면 저장, 이미 저장된 무언가를 전제하면 조회·수정·삭제·완료입니다.</span>
+          </div>
+          <div class="keypoint">
+            <span class="keypoint-tag">예시</span>
+            <span class="keypoint-body">헷갈리는 경계마다 <b>정답 예시를 붙였습니다.</b> "수세미 사야해"는 저장, "수세미 샀어"는 완료, "살 거 뭐였지"는 조회처럼 한 단어 차이를 구분선으로 삼았습니다.</span>
+          </div>
+          <div class="keypoint">
+            <span class="keypoint-tag">검증</span>
+            <span class="keypoint-body">모든 판정을 <b>로그로 남겨</b> 무엇이 왜 그렇게 판정됐는지 되짚습니다. 오분류 사례는 그대로 테스트셋이 되어, 판정 로직을 바꿀 때마다 배포 전에 다시 통과시킵니다.</span>
+          </div>
+        </div>
+      </section>
+
+      <section data-nav="인프라 · 보안">
         <h2>오라클 클라우드 인프라 &amp; mTLS 단말 보안</h2>
         <p class="lead">
           n8n은 Oracle Cloud Always Free VM에서 24시간 상시 가동됩니다.
@@ -772,7 +751,7 @@ flowchart TB
         </div>
 
         <h3 style="margin-top:28px;">mTLS 보안 구조</h3>
-        <p>Caddy가 리버스 프록시로 동작하며, <code style="background:#f1f5fb;padding:2px 6px;border-radius:4px;font-family:Consolas,monospace;font-size:.9em;">/webhook*</code> 경로만 개방하고
+        <p>Caddy가 리버스 프록시로 동작하며, <code>/webhook*</code> 경로만 개방하고
         그 외는 클라이언트 인증서가 없으면 403을 반환합니다. Telegram 봇 통신과 외부 API 아웃바운드는 영향 없습니다.</p>
 
         <div class="sec-flow" style="margin-top:20px;">
@@ -780,7 +759,7 @@ flowchart TB
           <div class="sec-side">
             <div class="sec-node">
               <b><svg class="ic" aria-hidden="true"><use href="#ic-bot"/></svg> Telegram Bot</b>
-              Webhook 이벤트 전송 (<code style="font-size:.82em;background:#f1f5fb;padding:1px 5px;border-radius:3px;">/webhook/wj-*</code>)
+              Webhook 이벤트 전송 (<code>/webhook/wj-*</code>)
             </div>
             <div class="sec-node">
               <b><svg class="ic" aria-hidden="true"><use href="#ic-globe"/></svg> 브라우저 (n8n 관리 UI)</b>
@@ -796,14 +775,14 @@ flowchart TB
           <div class="sec-center">
             <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
               <div class="sec-arrow-line"></div>
-              <span style="font-size:.72rem;color:#64748b;font-weight:700;">요청</span>
+              <span style="font-size:11px;color:var(--text-tertiary);font-weight:700;">요청</span>
             </div>
             <div class="sec-caddy">
               <b>Caddy</b>
               <span>Reverse Proxy<br>인증서 검증</span>
             </div>
             <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-              <span style="font-size:.72rem;color:#64748b;font-weight:700;">라우팅</span>
+              <span style="font-size:11px;color:var(--text-tertiary);font-weight:700;">라우팅</span>
               <div class="sec-arrow-line"></div>
             </div>
           </div>
@@ -824,770 +803,110 @@ flowchart TB
             </div>
           </div>
         </div>
-
-        <div class="grid two" style="margin-top:24px;">
-          <div class="callout">
-            <h3>등록된 단말 (2026-06-10 기준)</h3>
-            <p style="margin:8px 0 0;">갤럭시북 (노트북) <svg class="ic ic-ok" aria-hidden="true"><use href="#ic-check"/></svg> &nbsp;·&nbsp; 갤럭시 폰 <svg class="ic ic-ok" aria-hidden="true"><use href="#ic-check"/></svg><br>
-            <span style="font-size:.88rem;">인증서 만료: 2031-06-09 (CA 2036-06-07)</span></p>
-          </div>
-          <div class="callout">
-            <h3>새 단말 추가 절차</h3>
-            <p style="margin:8px 0 0;font-size:.92rem;">
-              1. <code style="background:#f1f5fb;padding:1px 5px;border-radius:3px;font-size:.88em;">ca.key</code>로 새 .p12 인증서 발급<br>
-              2. 새 단말에 <code style="background:#f1f5fb;padding:1px 5px;border-radius:3px;font-size:.88em;">ca.crt</code> + 새 .p12 설치<br>
-              3. 브라우저에서 n8n 도메인 접속 테스트<br>
-              <span style="font-size:.85rem;color:#92400e;"><svg class="ic ic-warn" aria-hidden="true"><use href="#ic-alert"/></svg> 서버 설정 변경 불필요, 기존 단말 영향 없음</span>
-            </p>
-          </div>
-        </div>
       </section>
 
-      <!-- ═══════════ 04 실제 화면 ═══════════ -->
-      <section>
-        <h2>실제 화면으로 보는 결과</h2>
-        <p class="lead">
-          n8n은 자동화 흐름을 실행하고, 텔레그램은 사용자가 결과를 확인하는 대화형 화면이 됩니다.
-        </p>
-        <div class="screenshot-grid">
-          <div class="shot-card">
-            <h3>n8n 워크플로우 노드 구성</h3>
-            <svg class="inline-shot" viewBox="0 0 1200 520" role="img" aria-label="n8n workflow screenshot embedded illustration">
-              <defs>
-                <pattern id="n8nGrid" width="24" height="24" patternUnits="userSpaceOnUse">
-                  <path d="M24 0H0V24" fill="none" stroke="#e8edf5" stroke-width="1"/>
-                </pattern>
-                <filter id="nodeShadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.12"/>
-                </filter>
-              </defs>
-              <rect width="1200" height="520" fill="#fbfcfe"/>
-              <rect width="1200" height="520" fill="url(#n8nGrid)"/>
-              <g fill="none" stroke="#94a3b8" stroke-width="2">
-                <path d="M90 250 C150 250 150 170 215 170 H310"/>
-                <path d="M90 250 C150 250 150 250 215 250 H310"/>
-                <path d="M90 250 C150 250 150 330 215 330 H310"/>
-                <path d="M420 170 H525 C575 170 575 250 625 250 H720"/>
-                <path d="M420 250 H720"/>
-                <path d="M420 330 H525 C575 330 575 250 625 250"/>
-                <path d="M830 250 H930"/>
-                <path d="M1010 250 H1110"/>
-                <path d="M720 250 H825"/>
-              </g>
-              <g filter="url(#nodeShadow)" font-family="Segoe UI, Malgun Gothic, sans-serif" font-size="14" font-weight="700">
-                <g transform="translate(32 220)">
-                  <rect width="112" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <circle cx="22" cy="30" r="12" fill="#26a5e4"/>
-                  <text x="44" y="27" fill="#172033">Telegram</text>
-                  <text x="44" y="45" fill="#647084" font-size="11">Trigger</text>
-                </g>
-                <g transform="translate(230 140)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#ea4b71"/>
-                  <text x="52" y="28" fill="#172033">메시지</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">파싱</text>
-                </g>
-                <g transform="translate(230 220)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#34a853"/>
-                  <text x="52" y="28" fill="#172033">Sheets</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">읽기</text>
-                </g>
-                <g transform="translate(230 300)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#f59e0b"/>
-                  <text x="52" y="28" fill="#172033">Pending</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">조회</text>
-                </g>
-                <g transform="translate(360 140)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#111827"/>
-                  <text x="52" y="28" fill="#172033">AI 분석</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">gpt-4o-mini</text>
-                </g>
-                <g transform="translate(360 220)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#2563eb"/>
-                  <text x="52" y="28" fill="#172033">카테고리</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">검증</text>
-                </g>
-                <g transform="translate(360 300)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#c2415d"/>
-                  <text x="52" y="28" fill="#172033">중복</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">확인</text>
-                </g>
-                <g transform="translate(730 220)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#34a853"/>
-                  <text x="52" y="28" fill="#172033">Sheets</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">저장</text>
-                </g>
-                <g transform="translate(930 220)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#1a73e8"/>
-                  <text x="52" y="28" fill="#172033">Calendar</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">자동 등록</text>
-                </g>
-                <g transform="translate(1060 220)">
-                  <rect width="120" height="60" rx="8" fill="#fff" stroke="#d3dbe8"/>
-                  <rect x="16" y="18" width="24" height="24" rx="5" fill="#26a5e4"/>
-                  <text x="52" y="28" fill="#172033">Telegram</text>
-                  <text x="52" y="46" fill="#647084" font-size="11">응답</text>
-                </g>
-              </g>
-            </svg>
-            <div class="shot-caption">텔레그램 입력 → AI 분석 → Sheets 저장 → Calendar 자동 등록 → 결과 응답까지 이어지는 전체 흐름입니다.</div>
-          </div>
-          <div class="shot-card phone">
-            <h3>텔레그램 실제 대화 화면</h3>
-            <svg class="inline-shot" viewBox="0 0 430 760" role="img">
-              <defs>
-                <linearGradient id="tgBg" x1="0" y1="0" x2="1" y2="1">
-                  <stop stop-color="#f6d77a"/>
-                  <stop offset="1" stop-color="#f59b58"/>
-                </linearGradient>
-              </defs>
-              <rect width="430" height="760" fill="url(#tgBg)"/>
-              <rect width="430" height="68" fill="#3f7f45"/>
-              <circle cx="58" cy="34" r="22" fill="#e8f4e9"/>
-              <text x="92" y="30" fill="#fff" font-family="Segoe UI, Malgun Gothic, sans-serif" font-size="20" font-weight="900">나만의 비서</text>
-              <text x="92" y="52" fill="#d7ead9" font-family="Segoe UI, Malgun Gothic, sans-serif" font-size="13">봇</text>
-              <g font-family="Segoe UI, Malgun Gothic, sans-serif">
-                <rect x="88" y="92" width="320" height="58" rx="18" fill="#fff1bd"/>
-                <text x="104" y="118" fill="#111827" font-size="15" font-weight="700">이번주 토요일 오전 9시부터 11시</text>
-                <text x="104" y="138" fill="#111827" font-size="15" font-weight="700">테니스야 멤버는 나, 아경, 동수</text>
-                <rect x="20" y="166" width="165" height="42" rx="16" fill="#fff"/>
-                <text x="38" y="193" fill="#111827" font-size="17" font-weight="800">처리중...</text>
-                <rect x="20" y="218" width="270" height="120" rx="16" fill="#fff"/>
-                <text x="40" y="247" fill="#111827" font-size="17" font-weight="900">테니스 일정</text>
-                <text x="40" y="271" fill="#111827" font-size="14">일정/할일 › 스포츠/운동</text>
-                <text x="40" y="296" fill="#596579" font-size="13">시간: 09:00~11:00 | 장소: - |</text>
-                <text x="40" y="314" fill="#596579" font-size="13">멤버: 아경, 동수 | 비고: -</text>
-                <text x="40" y="334" fill="#16836b" font-size="14" font-weight="900"> 캘린더 등록됨</text>
-                <rect x="20" y="358" width="270" height="80" rx="16" fill="#fff"/>
-                <text x="40" y="384" fill="#111827" font-size="16" font-weight="900">까꿍이 병원 예약필요</text>
-                <text x="40" y="406" fill="#111827" font-size="13">일정/할일 › 동물/반려동물</text>
-                <text x="40" y="428" fill="#c2415d" font-size="13" font-weight="700"> 예약 필요 항목입니다</text>
-              </g>
-            </svg>
-            <div class="shot-caption">자연어로 보내면 title suffix, 시간, 멤버까지 자동 정리되어 캘린더에 등록됩니다.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 05 어떤 걸 할 수 있나 ═══════════ -->
-      <section>
-        <h2>어떤 걸 할 수 있나</h2>
-        <div class="grid four">
-          <div class="card">
-            <div class="icon">IN</div>
-            <h3>아무 형식으로 저장</h3>
-            <p class="card-desc">텍스트, 이미지, PDF, 문서, 링크를 채팅하듯 보내면 기록으로 변환합니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">AI</div>
-            <h3>자동 분류와 요약</h3>
-            <p class="card-desc">AI가 제목, 대분류, 소분류, 키워드, 요약, 날짜·시간 정보를 추출합니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">CAL</div>
-            <h3>Calendar 자동 등록</h3>
-            <p class="card-desc">일정/할일 카테고리이면 날짜·시간을 분석해 Google Calendar에 바로 등록합니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">OK</div>
-            <h3>확인형 자동화</h3>
-            <p class="card-desc">중복, 새 카테고리, 수정 후보는 버튼으로 확인한 뒤 처리합니다.</p>
-          </div>
-        </div>
-
-        <table>
-          <thead>
-            <tr><th>사용자가 하는 일</th><th>시스템이 하는 일</th><th>결과</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>메모나 아이디어를 보낸다</td><td>내용을 분석해 제목, 분류, 요약, 키워드 생성</td><td>구조화된 기록으로 저장</td></tr>
-            <tr><td>일정을 채팅으로 알린다</td><td>날짜·시간·멤버를 추출하고 summary 양식으로 정리</td><td>Google Calendar에 자동 등록 + 텔레그램 확인</td></tr>
-            <tr><td>이미지, 캡처, 문서를 보낸다</td><td>파일 정보를 읽고 캡션이 부족하면 추가 설명 요청</td><td>파일과 설명을 하나의 항목으로 묶어 보관</td></tr>
-            <tr><td>전에 저장한 내용을 찾아달라고 한다</td><td>키워드와 후보 점수로 관련 항목을 찾음</td><td>텔레그램에서 후보 확인 후 내용 또는 파일 수신</td></tr>
-            <tr><td>기한이 있는 내용을 보낸다</td><td>날짜를 추출하고 Calendar와 리마인드 흐름에 연결</td><td>놓치기 쉬운 항목을 다시 알림</td></tr>
-          </tbody>
-        </table>
-      </section>
-
-      <!-- ═══════════ 06 일정 특화 기능 (NEW) ═══════════ -->
-      <section>
-        <h2>일정 특화 기능 — Phase 1 캘린더</h2>
-        <p class="lead">
-          단순 저장을 넘어, 일정 메시지에서 의미 있는 구조를 추출해 Google Calendar에 정확하게 연결합니다.
-          title 작성 규칙부터 반복 일정까지 세밀하게 설계되어 있습니다.
-        </p>
-
-        <h3>title suffix 정책</h3>
-        <p>AI가 메시지의 예약 완료 여부를 판단해 title 끝에 suffix를 붙입니다. 날짜·요일 정보는 title에 절대 포함하지 않습니다.</p>
-        <table>
-          <thead><tr><th>신호 표현</th><th>판정</th><th>suffix</th><th>예시 →결과</th></tr></thead>
-          <tbody>
-            <tr><td>~이야, ~야, 됐어, 잡았어, 있어, 예약했어</td><td>확정 상태</td><td><strong>~일정</strong></td><td>"이번주 토요일 테니스야" → 테니스 일정</td></tr>
-            <tr><td>가야해, 해야해, 잡아야해, 예약해야, 가야겠어</td><td>미확정 상태</td><td><strong>~예약필요</strong></td><td>"까꿍이 병원가야해" → 까꿍이 병원 예약필요</td></tr>
-            <tr><td>신호 불명확</td><td>기본값</td><td><strong>~일정</strong></td><td>애매하면 '일정'으로 처리</td></tr>
-          </tbody>
-        </table>
-
-        <h3 style="margin-top:24px;">summary 고정 양식</h3>
-        <p>일정/할일 카테고리이면 AI가 자유 텍스트 대신 아래 고정 양식으로 summary를 채웁니다. 정보가 없는 항목은 '-'로 표기하고, 레이블은 생략 불가입니다.</p>
-        <div class="callout" style="font-family:Consolas,'Cascadia Code',monospace;font-size:.96rem;color:#182235;line-height:2;">
-          시간: HH:MM~HH:MM &nbsp;|&nbsp; 장소: 장소명 &nbsp;|&nbsp; 멤버: 이름들 &nbsp;|&nbsp; 비고: 기타
-          <br>
-          <span style="color:#596579;font-size:.84rem;font-family:'Segoe UI',sans-serif;">예) 시간: 09:00~11:00 | 장소: - | 멤버: 아경, 동수 | 비고: -</span>
-        </div>
-
-        <h3 style="margin-top:24px;">Google Calendar 등록 3가지 모드</h3>
-        <div class="cal-modes">
-          <div class="cal-mode">
-            <div class="cal-mode-hd" style="background:#2563eb;">시간 지정 이벤트</div>
-            <div class="cal-mode-bd">
-              <p>start_time이 있을 때. 시작·종료 시간을 그대로 등록합니다. 종료 시간이 없으면 1시간 기본값.</p>
-              <code>dateTime: 2026-06-14T09:00:00+09:00</code>
-            </div>
-          </div>
-          <div class="cal-mode">
-            <div class="cal-mode-hd" style="background:#16836b;">하루종일 이벤트</div>
-            <div class="cal-mode-bd">
-              <p>start_time이 null일 때. 날짜만 지정해 종일 이벤트로 등록합니다.</p>
-              <code>date: "2026-06-19"</code>
-            </div>
-          </div>
-          <div class="cal-mode">
-            <div class="cal-mode-hd" style="background:#334155;">날짜 범위 이벤트</div>
-            <div class="cal-mode-bd">
-              <p>start_date ≠ due_date일 때. 범위 전체를 하나의 이벤트로 등록합니다.</p>
-              <code>start: "2026-06-16" → end: "2026-06-17"</code>
-            </div>
-          </div>
-        </div>
-
-        <h3 style="margin-top:24px;">반복 일정 &amp; notice</h3>
-        <div class="grid two">
-          <div class="callout">
-            <h3>RRULE 기반 반복 설정</h3>
-            <p style="font-size:.92rem;">AI가 반복 패턴을 감지하면 <code style="background:#f1f5fb;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:.88em;">recurrence</code> 필드를 채웁니다.</p>
-            <p style="font-size:.88rem;color:#475569;margin:6px 0 0;font-family:Consolas,'Cascadia Code',monospace;line-height:1.9;">
-              매주 화요일 → WEEKLY:TUE<br>
-              매주 월요일 → WEEKLY:MON<br>
-              매월 15일 → MONTHLY:15
-            </p>
-          </div>
-          <div class="callout">
-            <h3>notice — Telegram 전용 안내</h3>
-            <p style="font-size:.92rem;">반복 일정이 감지되면 Telegram에만 안내 메시지를 보냅니다. Sheets에는 저장되지 않습니다.</p>
-            <p style="font-size:.88rem;color:#475569;margin:6px 0 0;line-height:1.7;">
-              "매주/매월 반복 일정입니다.<br>구글 캘린더에서 반복 설정을 권장합니다."
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 07 지원 입력 타입 ═══════════ -->
-      <section>
-        <h2>지원 입력 타입과 사용 방식</h2>
-        <p class="lead">
-          저장, 수정, 삭제, 조회가 모두 채팅 명령과 버튼 확인으로 이어집니다.
-          사용자는 별도 관리 화면을 열지 않고 대화창 안에서 주요 기능을 처리합니다.
-        </p>
-
-        <div class="grid four">
-          <div class="card">
-            <div class="icon">TXT</div>
-            <h3>텍스트</h3>
-            <p class="card-desc">메모, 아이디어, 할 일, 일정처럼 짧은 자연어 입력을 바로 저장합니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">IMG</div>
-            <h3>이미지</h3>
-            <p class="card-desc">캡처, 사진, 안내문 이미지를 받아 주요 내용을 분석하고 파일과 함께 보관합니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">PDF</div>
-            <h3>PDF</h3>
-            <p class="card-desc">문서 제목, 목적, 날짜, 핵심 내용을 추출해 검색 가능한 항목으로 만듭니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">URL</div>
-            <h3>링크</h3>
-            <p class="card-desc">URL을 보내면 페이지 내용을 분석해 제목·분류·요약을 생성합니다.</p>
-          </div>
-        </div>
-
-        <div class="command-grid">
-          <div class="command">
-            <strong>저장</strong>
-            그냥 메시지나 파일을 보냅니다.
-            <code>이번주 토요일 9시 테니스야</code>
-          </div>
-          <div class="command">
-            <strong>수정</strong>
-            바뀐 내용을 자연어로 말하면 관련 항목을 찾아 확인 후 바꿉니다.
-            <code>내일 테니스 약속 15일로 미뤄졌어</code>
-          </div>
-          <div class="command">
-            <strong>삭제</strong>
-            지우고 싶은 내용을 말하면 후보를 보여주고 확인 후 삭제합니다.
-            <code>아까 저장한 테니스 약속 지워줘</code>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 08 전체 연계 도식 ═══════════ -->
-      <section>
-        <h2>전체 연계 도식</h2>
-        <p class="lead">
-          오라클 클라우드 VM 위에 n8n이 가동되고, Caddy가 트래픽을 제어합니다.
-          Telegram은 입출력, AI API는 이해와 분류, Google Cloud는 인증과 저장 레이어입니다.
-        </p>
-        <div class="diagram-wrap">
-          <div class="mermaid">
-flowchart LR
-  U["사용자"] --> TG["Telegram Bot\n입력·버튼·응답"]
-  TG --> CADDY["Caddy\n/webhook* open\n그 외 mTLS 차단"]
-  CADDY --> N8N["n8n Workflow\n오라클 클라우드 VM"]
-
-  N8N --> OPENAI["gpt-4o-mini\n분류·요약·추출\n(전 타입 동일)"]
-
-  N8N --> GCLOUD["Google Cloud\nService Account·API 권한"]
-  GCLOUD --> SHEETS["Google Sheets\n인덱스 DB"]
-  GCLOUD --> DRIVE["Google Drive\n파일 저장소"]
-  GCLOUD --> CAL["Google Calendar\n일정·반복 항목"]
-
-  SHEETS --> N8N
-  DRIVE --> N8N
-  CAL --> N8N
-  N8N --> TG
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 09 저장되는 데이터 구조 ═══════════ -->
-      <section>
-        <h2>저장되는 데이터 구조</h2>
-        <p>
-          단순 메시지 원문만 저장하는 것이 아니라, 검색·수정·자동화에 쓸 수 있도록
-          여러 필드를 함께 저장합니다. 일정 특화 필드(start_date, start_time, end_time, recurrence)가 추가되어
-          Google Calendar와 정밀하게 연동됩니다.
-        </p>
-
-        <h3 style="margin-top:20px;">Sheets에 저장되는 필드</h3>
-        <div class="field-grid">
-          <div class="field"><b>record_key</b><span>시스템 내부 식별값</span></div>
-          <div class="field"><b>title</b><span>AI 생성 짧은 제목<br><span style="color:#c2415d;font-size:.82em;">suffix: 일정 / 예약필요</span></span></div>
-          <div class="field"><b>L1 / L2</b><span>대분류와 소분류 카테고리</span></div>
-          <div class="field"><b>entities</b><span>검색에 쓸 핵심 키워드</span></div>
-          <div class="field"><b>summary</b><span>요약 텍스트<br><span style="color:#2563eb;font-size:.82em;">일정: 시간|장소|멤버|비고 고정 양식</span></span></div>
-          <div class="field"><b>due_date</b><span>마지막 날짜 / 기한 (YYYY-MM-DD)</span></div>
-          <div class="field"><b>start_date</b><span>범위 시작일. 단일이면 due_date와 동일</span></div>
-          <div class="field"><b>start_time</b><span>시작 시간 HH:MM. 없으면 null (하루종일)</span></div>
-          <div class="field"><b>end_time</b><span>종료 시간 HH:MM. 명시된 경우만 저장</span></div>
-          <div class="field"><b>recurrence</b><span>반복 패턴 (WEEKLY:TUE 등). 없으면 null</span></div>
-          <div class="field"><b>file_path</b><span>Drive에 저장된 파일 위치</span></div>
-          <div class="field"><b>status</b><span>대기, 저장, 수정 등 처리 상태</span></div>
-        </div>
-
-        <h3 style="margin-top:20px;">Telegram 전용 필드 (Sheets 미저장)</h3>
-        <div class="field-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
-          <div class="field telegram-only">
-            <b>notice</b>
-            <span>반복 일정 감지 시 Telegram에만 전달하는 안내 메시지.<br>
-            "매주/매월 반복 일정입니다. 구글 캘린더에서 반복 설정을 권장합니다."</span>
-          </div>
-          <div class="field telegram-only" style="border-color:#fcd34d;">
-            <b>왜 Telegram 전용인가?</b>
-            <span>notice는 사용자에게 한 번 안내하면 충분하고, 이후 조회·검색에서 필요하지 않아 Sheets에 별도 컬럼을 두지 않았습니다.</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 10 도구별 역할 ═══════════ -->
-      <section>
-        <h2>도구별 역할</h2>
-        <div class="swimlane" style="grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;">
-          <div class="lane">
-            <div class="lane-title">Telegram</div>
-            <div class="lane-body">사용자와 시스템이 만나는 채팅 인터페이스. 메시지, 파일, 버튼 클릭을 받고 결과를 전달합니다.</div>
-          </div>
-          <div class="lane">
-            <div class="lane-title">n8n</div>
-            <div class="lane-body">전체 흐름의 두뇌. 입력 종류 구분, API 호출, 성공·실패 응답을 처리합니다. 오라클 VM 상시 가동.</div>
-          </div>
-          <div class="lane">
-            <div class="lane-title">Caddy</div>
-            <div class="lane-body">리버스 프록시 + mTLS 보안 게이트웨이. /webhook* 개방, 그 외 인증서 없으면 403.</div>
-          </div>
-          <div class="lane">
-            <div class="lane-title">Oracle Cloud</div>
-            <div class="lane-body">Always Free VM (서울 리전). 24시간 n8n 상시 가동. 로컬 Docker 의존에서 벗어난 인프라 기반.</div>
-          </div>
-        </div>
-        <div class="swimlane" style="grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;margin-top:12px;">
-          <div class="lane">
-            <div class="lane-title">gpt-4o-mini</div>
-            <div class="lane-body">텍스트·이미지·PDF·URL 전 타입에 단일 모델 적용. 빠른참조 날짜 지시를 정확히 따릅니다.</div>
-          </div>
-          <div class="lane">
-            <div class="lane-title">Google Sheets</div>
-            <div class="lane-body">제목, 카테고리, 요약, 날짜 필드, 파일 위치, 상태값을 저장하는 인덱스 DB 역할입니다.</div>
-          </div>
-          <div class="lane">
-            <div class="lane-title">Google Calendar</div>
-            <div class="lane-body">일정/할일 카테고리 항목을 3가지 모드(시간/하루종일/날짜범위)로 자동 등록합니다.</div>
-          </div>
-          <div class="lane">
-            <div class="lane-title">Google Cloud</div>
-            <div class="lane-body">Sheets, Drive, Calendar API를 쓰기 위한 프로젝트, 권한, 서비스 계정 인증 기반입니다.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 11 데이터 처리 흐름 (Custom Pipeline) ═══════════ -->
-      <section>
-        <h2>데이터 처리 흐름</h2>
-        <p class="lead">사용자의 메시지 한 건이 어떤 경로를 거쳐 저장·실행되는지 단계별로 보여줍니다.</p>
-
-        <div class="pipe-flow" style="gap:6px;">
-          <div class="pipe-stage">
-            <div class="pipe-stage-hd" style="background:#26a5e4;">
-              <span class="pnum">01</span> 입력
-            </div>
-            <div class="pipe-stage-bd">
-              <div class="pipe-stage-name">사용자</div>
-              <div class="pipe-stage-detail">텍스트·이미지·PDF·링크를 텔레그램에 전송</div>
-            </div>
-          </div>
-          <div class="pipe-conn">→</div>
-
-          <div class="pipe-stage">
-            <div class="pipe-stage-hd" style="background:#1a56db;">
-              <span class="pnum">02</span> 수신
-            </div>
-            <div class="pipe-stage-bd">
-              <div class="pipe-stage-name">Telegram → Caddy → n8n</div>
-              <div class="pipe-stage-detail">Webhook 이벤트 전달. /webhook* 경로로 mTLS 우회</div>
-            </div>
-          </div>
-          <div class="pipe-conn">→</div>
-
-          <div class="pipe-stage">
-            <div class="pipe-stage-hd" style="background:#ea4b71;">
-              <span class="pnum">03</span> 파싱
-            </div>
-            <div class="pipe-stage-bd">
-              <div class="pipe-stage-name">n8n 전처리</div>
-              <div class="pipe-stage-detail">입력 유형(텍스트/파일/버튼) 추출, 명시 접두어(수정:/삭제:/메모:/조회:) 확정</div>
-            </div>
-          </div>
-          <div class="pipe-conn">→</div>
-
-          <div class="pipe-stage">
-            <div class="pipe-stage-hd" style="background:#b7791f;">
-              <span class="pnum">04</span> 의도분류
-            </div>
-            <div class="pipe-stage-bd">
-              <div class="pipe-stage-name">gpt-4o-mini (AI 라우터)</div>
-              <div class="pipe-stage-detail">생성/수정/삭제/조회/완료 action 판별. 접두어로 이미 확정된 건 AI 호출 자체를 건너뜀</div>
-            </div>
-          </div>
-          <div class="pipe-conn">→</div>
-
-          <div class="pipe-stage">
-            <div class="pipe-stage-hd" style="background:#334155;">
-              <span class="pnum">05</span> 분석
-            </div>
-            <div class="pipe-stage-bd">
-              <div class="pipe-stage-name">gpt-4o-mini</div>
-              <div class="pipe-stage-detail">title·L1/L2·날짜·시간·summary·recurrence 추출 → JSON</div>
-            </div>
-          </div>
-          <div class="pipe-conn">→</div>
-
-          <div class="pipe-stage">
-            <div class="pipe-stage-hd" style="background:#16836b;">
-              <span class="pnum">06</span> 저장·실행
-            </div>
-            <div class="pipe-stage-bd">
-              <div class="pipe-stage-name">Google APIs</div>
-              <div class="pipe-stage-detail">Sheets 저장 · Drive 업로드 · Calendar 등록 (조건부)</div>
-            </div>
-          </div>
-          <div class="pipe-conn">→</div>
-
-          <div class="pipe-stage">
-            <div class="pipe-stage-hd" style="background:#26a5e4;">
-              <span class="pnum">07</span> 응답
-            </div>
-            <div class="pipe-stage-bd">
-              <div class="pipe-stage-name">Telegram</div>
-              <div class="pipe-stage-detail">완료·확인·오류 메시지 + notice(반복 일정 시)</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 조건부 분기 표시 -->
-        <div style="margin-top:20px;">
-          <h3>단계 06 조건부 분기</h3>
-          <div class="grid three" style="gap:12px;margin-top:12px;">
-            <div style="padding:14px 16px;border-radius:8px;border:1px solid #dbe3ee;background:#f8fafc;border-left:4px solid #2563eb;">
-              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#1d4ed8;"><svg class="ic" aria-hidden="true"><use href="#ic-folder"/></svg> 모든 항목</strong>
-              <span style="font-size:.88rem;color:#475569;line-height:1.6;">Google Sheets에 구조화된 필드로 저장</span>
-            </div>
-            <div style="padding:14px 16px;border-radius:8px;border:1px solid #dbe3ee;background:#f8fafc;border-left:4px solid #16836b;">
-              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#166534;"><svg class="ic" aria-hidden="true"><use href="#ic-cal"/></svg> 일정/할일 카테고리</strong>
-              <span style="font-size:.88rem;color:#475569;line-height:1.6;">Google Calendar 자동 등록 (시간/하루종일/날짜범위 중 자동 선택)</span>
-            </div>
-            <div style="padding:14px 16px;border-radius:8px;border:1px solid #dbe3ee;background:#f8fafc;border-left:4px solid #334155;">
-              <strong style="font-size:.9rem;display:block;margin-bottom:6px;color:#334155;"><svg class="ic" aria-hidden="true"><use href="#ic-clip"/></svg> 파일 첨부 항목</strong>
-              <span style="font-size:.88rem;color:#475569;line-height:1.6;">Google Drive에 파일 업로드, Sheets에 경로 기록</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 12 n8n 내부 처리 케이스 (Custom Branch) ═══════════ -->
-      <section>
-        <h2>n8n 내부 처리 케이스</h2>
-        <p>
-          사용자는 채팅만 하지만, 뒤에서는 입력 유형과 명령 의도에 따라
-          서로 다른 경로로 처리됩니다.
-        </p>
-
-        <div class="branch-grid">
-          <div class="bcase">
-            <div class="bcase-hd" style="background:#2563eb;">일반 텍스트 저장</div>
-            <div class="bcase-bd">
-              <div class="bcase-step"><span class="bstep-dot" style="background:#2563eb;"></span>텍스트 수신 → 메시지 파싱</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#334155;"></span>gpt-4o-mini로 전체 필드 추출</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#64748b;"></span>카테고리 검증 → 중복 체크</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#16836b;"></span>Sheets 저장</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#16836b;"></span>일정/할일이면 Calendar 등록</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#26a5e4;"></span>텔레그램 완료 응답</div>
-            </div>
-          </div>
-
-          <div class="bcase">
-            <div class="bcase-hd" style="background:#ea4b71;">파일 + 캡션 없음 (Pending)</div>
-            <div class="bcase-bd">
-              <div class="bcase-step"><span class="bstep-dot" style="background:#ea4b71;"></span>파일만 수신 (캡션 없음)</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#f59e0b;"></span>Pending 시트에 파일 임시 저장</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#64748b;"></span>"설명을 보내주세요" 안내</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#ea4b71;"></span>다음 텍스트 수신 → 파일과 병합</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#334155;"></span>gpt-4o-mini 분석 → 저장</div>
-            </div>
-          </div>
-
-          <div class="bcase">
-            <div class="bcase-hd" style="background:#b7791f;">수정 / 삭제 / 조회</div>
-            <div class="bcase-bd">
-              <div class="bcase-step"><span class="bstep-dot" style="background:#b7791f;"></span>AI 의도분류로 action 판별 (생성/수정/삭제/조회/완료)</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#64748b;"></span>Sheets에서 후보 항목 검색</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#b7791f;"></span>후보 버튼으로 사용자 확인</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#16836b;"></span>확인 후 Sheets 갱신 / 항목 반환</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#26a5e4;"></span>텔레그램 결과 응답</div>
-            </div>
-          </div>
-
-          <div class="bcase">
-            <div class="bcase-hd" style="background:#c2415d;">중복 감지 / 새 카테고리</div>
-            <div class="bcase-bd">
-              <div class="bcase-step"><span class="bstep-dot" style="background:#c2415d;"></span>중복 가능성 감지 → 덮어쓰기/취소 버튼</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#334155;"></span>새 카테고리 감지 → 등록 확인 요청</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#64748b;"></span>사용자 버튼 응답 대기</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#16836b;"></span>확인 선택 → Sheets 저장 실행</div>
-              <div class="bcase-step"><span class="bstep-dot" style="background:#26a5e4;"></span>완료 응답</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 13 Google 서비스 연계 ═══════════ -->
-      <section>
-        <h2>Google 서비스 연계 구조</h2>
-        <div class="diagram-wrap">
-          <div class="mermaid">
-flowchart TB
-  GC["Google Cloud Project"] --> SA["Service Account\n서버 간 인증"]
-  SA --> AUTH["OAuth/JWT Token\nAPI 호출 권한"]
-  AUTH --> S1["Sheets API\n인덱스 읽기·추가·수정·삭제"]
-  AUTH --> S2["Drive API\n파일 업로드·다운로드 링크"]
-  AUTH --> S3["Calendar API\n3가지 모드 이벤트 등록"]
-
-  S1 --> IDX["메인 인덱스 DB 시트\n(record_key~recurrence)"]
-  S1 --> CAT["카테고리 관리 시트"]
-  S1 --> TMP["Pending 대기 시트"]
-  S2 --> FILE["첨부 파일 저장 폴더"]
-  S3 --> EVENT["캘린더 이벤트\n(시간 지정 / 하루종일 / 날짜범위)"]
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 14 AI 모델 연계 ═══════════ -->
-      <section>
-        <h2>AI 모델 연계 구조</h2>
-        <p>
-          <strong>gpt-4o-mini</strong> 단일 모델을 의도분류와 본분석, 두 단계에서 나눠 씁니다.
-          모델을 통일함으로써 날짜 계산 정확도와 지시문 준수율을 높였습니다.
-          본분석 프롬프트에는 오늘 날짜 기준으로 이번주/다음주 날짜를 미리 계산한 빠른참조 테이블이 포함됩니다.
-        </p>
-        <div class="diagram-wrap">
-          <div class="mermaid">
-flowchart LR
-  INPUT["원본 입력\n텍스트·이미지·PDF·URL"] --> PRE["n8n 전처리\n입력 유형 추출 · 접두어 확정"]
-  PRE -->|접두어로 미확정| INTENT["gpt-4o-mini\n의도분류 (action 판별)"]
-  PRE -->|접두어로 이미 확정| ROUTER
-  INTENT --> ROUTER["gpt-4o-mini\n입력 타입별 프롬프트 구성"]
-  ROUTER --> O1["텍스트 분석\n분류·요약·날짜·시간 추출"]
-  ROUTER --> O2["Vision / PDF 분석\n파일 내용 이해 + 구조화"]
-
-  O1 --> JSON["표준 JSON\ntitle, L1, L2, entities\ndue_date, start_date, start_time\nend_time, summary, recurrence"]
-  O2 --> JSON
-  JSON --> VALIDATE["카테고리 검증·중복 체크"]
-  VALIDATE --> SAVE["저장·Calendar·응답 자동화"]
-          </div>
-        </div>
-        <div class="callout" style="margin-top:20px;">
-          <h3>빠른참조 테이블 — 날짜 오류 방지 핵심</h3>
-          <p style="font-size:.92rem;margin-top:8px;">
-            프롬프트 첫 줄에 <code style="background:#f1f5fb;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:.88em;">오늘=2026-06-14, 이번주 토=2026-06-14, 다음주 화=2026-06-16...</code> 식으로
-            모든 요일을 실제 날짜로 미리 계산해 주입합니다. AI는 직접 날짜를 계산하지 않고
-            이 테이블에서 복사만 합니다. gpt-4.1-nano에서 발생하던 날짜 off-by-one 오류가 이 방법으로 해결되었습니다.
-          </p>
-        </div>
-        <div class="callout" style="margin-top:16px;">
-          <h3>왜 키워드 룰에서 AI 의도분류로 바꿨나</h3>
-          <p style="font-size:.92rem;margin-top:8px;">
-            초기에는 "삭제해", "확인해" 같은 끝말 키워드로 생성/수정/삭제/조회를 n8n 안에서 직접 판별했습니다.
-            문장 구조가 조금만 벗어나도 다른 의도로 오분류되는 문제가 반복됐습니다.
-            그래서 이 판별 로직을 통째로 걷어내고, 별도의 경량 AI 호출(의도분류)이 action만 먼저 결정하도록 분리했습니다.
-            키워드 룰은 완전히 사라진 게 아니라 <code style="background:#f1f5fb;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:.88em;">수정:</code> /
-            <code style="background:#f1f5fb;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:.88em;">삭제:</code> 같은
-            명시적 접두어 확정과, AI 호출 장애 시 폴백 용도로만 남았습니다.
-          </p>
-        </div>
-      </section>
-
-      <!-- ═══════════ 15 핵심 설계 포인트 ═══════════ -->
-      <section>
-        <h2>핵심 설계 포인트</h2>
-        <div class="grid three">
-          <div class="card">
-            <div class="icon">01</div>
-            <h3>채팅을 입력 폼으로 사용</h3>
-            <p class="card-desc">복잡한 UI 없이 평소 쓰는 메신저를 자동화의 시작점으로 만들었습니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">02</div>
-            <h3>AI 결과를 데이터화</h3>
-            <p class="card-desc">AI 답변을 문장으로 끝내지 않고, 후속 처리 가능한 JSON 구조로 변환합니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">03</div>
-            <h3>확인 필요한 자동화</h3>
-            <p class="card-desc">중복, 수정 후보, 새 카테고리는 버튼 선택을 거쳐 데이터 품질을 지킵니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">04</div>
-            <h3>서버 상시 가동</h3>
-            <p class="card-desc">Oracle Cloud Always Free VM으로 로컬 PC 의존 없이 24시간 자동화가 동작합니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">05</div>
-            <h3>mTLS 단말 인증</h3>
-            <p class="card-desc">관리 화면은 클라이언트 인증서 설치 단말만 접근 가능. Telegram 봇은 개방 유지.</p>
-          </div>
-          <div class="card">
-            <div class="icon">06</div>
-            <h3>일정 특화 분석</h3>
-            <p class="card-desc">title suffix, summary 고정 양식, Calendar 3가지 모드를 통해 일정 데이터 품질을 높였습니다.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 16 핵심 구현 패턴 ═══════════ -->
-      <section>
-        <h2>핵심 구현 패턴</h2>
-        <div class="grid three">
-          <div class="card">
-            <div class="icon">P</div>
-            <h3>Pending 패턴</h3>
-            <p class="card-desc">파일만 먼저 오고 설명이 나중에 오는 경우, 임시 저장소에 상태를 남겨 두 메시지를 하나의 기록으로 합칩니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">V</div>
-            <h3>검증 가능한 AI</h3>
-            <p class="card-desc">AI의 분류 결과를 바로 저장하지 않고 카테고리 목록, 중복 후보, 사용자 버튼 확인을 거칩니다.</p>
-          </div>
-          <div class="card">
-            <div class="icon">R</div>
-            <h3>빠른참조 프롬프트</h3>
-            <p class="card-desc">날짜 계산을 AI에게 맡기지 않고, 오늘 기준 모든 요일의 날짜를 프롬프트에 미리 주입해 오류를 방지합니다.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════ 17 결과적으로 가능한 일 ═══════════ -->
-      <section>
+      <section data-nav="결과">
         <h2>결과적으로 가능한 일</h2>
         <div class="callout">
-          <h3>개인용 정보 수집함 + AI 분류기 + 일정 자동화 실행기를 하나로 묶은 시스템</h3>
+          <h3>정보 수집함 · AI 분류기 · 일정 자동화 실행기를 하나로 묶은 시스템</h3>
           <p>
-            이 시스템은 단순한 챗봇이 아니라, 사용자가 보낸 정보를 이해하고,
-            저장 가능한 형태로 정리하고, 일정이면 캘린더까지 자동으로 연결하는 개인 운영 도구입니다.
-            Oracle Cloud 서버에서 상시 가동되고, mTLS로 보안이 유지됩니다.
+            보낸 정보를 이해하고, 저장 가능한 형태로 정리하고, 일정이면 캘린더까지 연결한 뒤
+            다음 날 아침에 다시 꺼내주는 개인 운영 도구입니다.
+            Oracle Cloud에서 24시간 가동되고, 관리 화면은 mTLS로 잠겨 있습니다.
           </p>
         </div>
         <div class="badge-row">
           <span class="badge">메모 저장</span>
           <span class="badge">이미지 분석</span>
-          <span class="badge">PDF/문서 정리</span>
+          <span class="badge">PDF · 문서 정리</span>
           <span class="badge">링크 보관</span>
           <span class="badge">자동 카테고리화</span>
+          <span class="badge">소분류 자동 학습</span>
           <span class="badge">중복 확인</span>
           <span class="badge">조회</span>
           <span class="badge">수정</span>
           <span class="badge">삭제</span>
           <span class="badge">파일 저장</span>
           <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-cal"/></svg> Calendar 자동등록</span>
-          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-book"/></svg> 예약필요 알림</span>
           <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-repeat"/></svg> 반복 일정 감지</span>
-          <span class="badge new">⏰ 시간 범위 등록</span>
-          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-board"/></svg> summary 정형화</span>
-          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-compass"/></svg> AI 의도분류 라우터</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-board"/></svg> 다중 일정 분해</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-compass"/></svg> AI 의도분류</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-check"/></svg> 완료 · 소진 처리</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-book"/></svg> 만료 항목 알림</span>
+          <span class="badge new"><svg class="ic" aria-hidden="true"><use href="#ic-bot"/></svg> 모닝 리포트</span>
           <span class="badge security"><svg class="ic" aria-hidden="true"><use href="#ic-lock"/></svg> mTLS 단말 보안</span>
           <span class="badge security"><svg class="ic" aria-hidden="true"><use href="#ic-cloud"/></svg> 오라클 클라우드 상시가동</span>
         </div>
       </section>
 
     </main>
-
-    <footer>
-      <strong>AI 개인비서 자동화 시스템 v5</strong><br>
-      Telegram · n8n (Oracle Cloud Always Free VM) · Caddy mTLS · gpt-4o-mini · Google Cloud · Sheets · Drive · Calendar
-    </footer>
   </div>
+
+  <footer>
+      <strong>AI 개인비서 자동화 시스템</strong> · 2026-09-04 기준 · 워크플로우 노드 124개<br>
+      Telegram · n8n (Oracle Cloud Always Free VM) · Caddy mTLS · gpt-4o-mini · Google Sheets · Drive · Calendar
+  </footer>
 
   <script>
     mermaid.initialize({
       startOnLoad: true,
       theme: "base",
       themeVariables: {
-        primaryColor: "#edf4ff",
-        primaryTextColor: "#142033",
-        primaryBorderColor: "#2563eb",
-        lineColor: "#94a3b8",
-        secondaryColor: "#f5f8fc",
-        tertiaryColor: "#ffffff",
-        edgeLabelBackground: "#ffffff",
-        fontSize: "15px"
+        background: "#FFFFFF",
+        primaryColor: "#FBF1EA",
+        primaryTextColor: "#2C2C2C",
+        primaryBorderColor: "#A85A2E",
+        secondaryColor: "#FAF9F6",
+        secondaryBorderColor: "#E8E4DC",
+        tertiaryColor: "#FFFFFF",
+        tertiaryBorderColor: "#E8E4DC",
+        lineColor: "#8E8E93",
+        textColor: "#2C2C2C",
+        edgeLabelBackground: "#FFFFFF",
+        fontFamily: "Pretendard, -apple-system, sans-serif",
+        fontSize: "14px"
       }
     });
+
+    /* ── 섹션 ID 부여 · 목차 · 우측 네비게이터 ── */
+    (function(){
+      var secs = [].slice.call(document.querySelectorAll("main > section"));
+      var toc  = document.getElementById("toc-list");
+      var nav  = document.getElementById("tocFloating");
+
+      secs.forEach(function(sec, i){
+        var h2 = sec.querySelector("h2");
+        if(!h2) return;
+        sec.id = "sec-" + (i + 1);
+        var full  = h2.textContent.trim();
+        var short = sec.getAttribute("data-nav") || full;
+
+        var item = document.createElement("a");
+        item.className = "toc-item";
+        item.href = "#" + sec.id;
+        item.innerHTML = '<span class="toc-num">' + String(i + 1).padStart(2, "0") + "</span>" + full;
+        toc.appendChild(item);
+
+        var link = document.createElement("a");
+        link.href = "#" + sec.id;
+        link.textContent = short;
+        link.title = full;
+        nav.appendChild(link);
+      });
+
+      var links = [].slice.call(nav.querySelectorAll("a"));
+      function update(){
+        var cur = "";
+        links.forEach(function(a){
+          var t = document.getElementById(a.getAttribute("href").slice(1));
+          if(t && window.scrollY >= t.offsetTop - 140) cur = a.getAttribute("href");
+        });
+        if(!cur && links.length) cur = links[0].getAttribute("href");
+        links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("href") === cur); });
+      }
+      window.addEventListener("scroll", update, { passive: true });
+      update();
+    })();
   </script>
 </body>
 </html>
